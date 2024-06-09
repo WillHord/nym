@@ -19,20 +19,3 @@ pub fn sync_aliases(file: &str, aliases: &[Alias]) {
 //     append_alias_to_alias_file(alias.clone(), file);
 // }
 
-pub fn test_source_file(file: &str) {
-    // println!("Sourcing file: {}", file);
-    // let test = std::process::Command::new(".")
-    //     .arg(file)
-    //     .output()
-    //     .expect("Error sourcing file");
-
-    println!("{}", file);
-
-    let _x = std::io::stdout().flush();
-
-    exit(0)
-
-    // println!("{}", String::from_utf8_lossy(&test.stdout));
-
-    // println!("Sourced file");
-}

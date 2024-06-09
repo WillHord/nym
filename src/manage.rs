@@ -6,6 +6,18 @@ use crate::file_management::{
     Alias,
 };
 
+use console::style;
+use dialoguer::Confirm;
+
+fn confirm_alias(alias: &Alias) -> bool {
+    // Ask for confirmation
+    let confirm = Confirm::new()
+        .with_prompt(format!("Did you mean {}?", alias.name))
+        .interact()
+        .unwrap();
+    confirm
+}
+
 pub fn add_alias_command(
     json_file: &str,
     alias_file: &str,
@@ -26,8 +38,8 @@ pub fn add_alias_command(
     // Check if alias already exists
     // If it does, return error
     if check_alias_exists(name, json_file) {
-        // TODO: Create better error message (with color)
-        panic!("Alias already exists");
+        println!("{}", style("Error: Alias already exists").red());
+        std::process::exit(1);
     }
 
     let alias = Alias {
@@ -40,7 +52,14 @@ pub fn add_alias_command(
     add_alias(&alias, json_file);
     append_alias_to_alias_file(&alias, alias_file);
 
-    println!("Alias added successfully");
+    println!(
+        "{}: Alias created successfully",
+        style("Success").green().bold()
+    );
+    println!(
+        "Please run {} to activate the alias",
+        style("exec \"$SHELL\"").bold().italic()
+    );
 }
 
 pub fn remove_alias_command(json_file: &str, alias_file: &str, name: &str) {
@@ -54,27 +73,31 @@ pub fn remove_alias_command(json_file: &str, alias_file: &str, name: &str) {
         None => panic!("Alias not found"),
     };
 
-    if alias.name != name {
-        // Ask for confirmation
-        println!("Did you mean {}? (y/n)", alias.name);
-        let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
-        if input.trim().to_lowercase() != "y" {
-            panic!("Exiting");
-        }
+    if alias.name != name && !confirm_alias(&alias) {
+        eprintln!(
+            "{}{}",
+            style("Error:").red().bold(),
+            style("Please Try again with a different alias").red()
+        );
+        std::process::exit(1);
     }
 
-    println!("Are you sure you want to delete {}? (y/n)", alias.name);
-    let mut input = String::new();
-    std::io::stdin().read_line(&mut input).unwrap();
-    if input.trim().to_lowercase() != "y" {
-        panic!("Exiting");
+    if !Confirm::new()
+        .with_prompt(format!("Are you sure you want to delete {}?", alias.name))
+        .interact()
+        .unwrap()
+    {
+        eprintln!("{}", style("Exiting").italic());
+        std::process::exit(1);
     }
 
     // Remove alias
     remove_alias_by_name(&alias.name, json_file);
     remove_alias_from_alias_file(&alias.name, alias_file);
-    println!("Alias removed successfully");
+    println!(
+        "{}: Alias removed successfully",
+        style("Success").green().bold()
+    );
 }
 
 pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
@@ -84,15 +107,13 @@ pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
         None => panic!("Alias not found"),
     };
 
-    // TODO: Move to new function
-    if alias.name != name {
-        // Ask for confirmation
-        println!("Did you mean {}? (y/n)", alias.name);
-        let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
-        if input.trim().to_lowercase() != "y" {
-            panic!("Exiting");
-        }
+    if alias.name != name && !confirm_alias(&alias) {
+        eprintln!(
+            "{}{}",
+            style("Error:").red().bold(),
+            style("Please Try again with a different alias").red()
+        );
+        std::process::exit(1);
     }
 
     toggle_alias_by_name(&alias.name, json_file);
@@ -106,7 +127,11 @@ pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
 
     println!(
         "Alias {} is now {}",
-        alias.name,
-        if alias.enabled { "enabled" } else { "disabled" }
+        style(alias.name).italic().bold(),
+        if alias.enabled {
+            style("enabled").bold().green()
+        } else {
+            style("disabled").bold().red()
+        }
     );
 }

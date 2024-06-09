@@ -99,7 +99,6 @@ fn main() {
         }
         Some(("sync", sub_m)) => {
             let file = sub_m.get_one::<String>("file").unwrap();
-            crate::sync::test_source_file(file);
         }
         _ => {
             panic!("Invalid command");
