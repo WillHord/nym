@@ -73,9 +73,15 @@ fn main() {
         // .subcommand(
         //     Command::new("uninstall")
         // )
-        // .subcommand(
-        //     Command::new("man")
-        // )
+        .subcommand(
+            Command::new("man")
+                .about("Open up description of alias")
+                .arg(
+                    Arg::new("name")
+                        .required(true)
+                        .help("The name of the alias to view description of"),
+                ),
+        )
         .get_matches();
 
     match matches.subcommand() {
@@ -102,6 +108,10 @@ fn main() {
         Some(("sync", sub_m)) => {
             let force: bool = *sub_m.get_one::<bool>("force").unwrap_or(&false);
             crate::sync::sync_aliases(JSON_FILE, ALIAS_FILE, force);
+        }
+        Some(("man", sub_m)) => {
+            let name = sub_m.get_one::<String>("name").unwrap();
+            crate::list::alias_manual(JSON_FILE, name);
         }
         _ => {
             panic!("Invalid command");

@@ -30,11 +30,6 @@ pub fn get_aliases_from_alias_file(file: &str) -> Vec<Alias> {
     aliases
 }
 
-// pub fn reset_alias_file(file: &str) {
-//     std::fs::remove_file(file).expect("Error removing file");
-//     std::fs::write(file, "").expect("Error writing to file");
-// }
-
 pub fn write_aliases_to_alias_file(aliases: Vec<Alias>, file: &str) {
     let mut alias_dotfile = String::new();
 
