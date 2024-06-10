@@ -54,6 +54,18 @@ pub fn toggle_alias_by_name(name: &str, file: &str) {
     std::fs::write(file, json).expect("Error writing to file");
 }
 
+pub fn set_alias_by_name(name: &str, enabled: bool, file: &str) {
+    let mut json = get_aliases_from_file(file);
+    for alias in json.aliases.iter_mut() {
+        if alias.name == name {
+            alias.enabled = enabled;
+        }
+    }
+
+    let json = serde_json::to_string_pretty(&json).unwrap();
+    std::fs::write(file, json).expect("Error writing to file");
+}
+
 pub fn add_alias(alias: &Alias, file: &str) {
     // Get json from file, add new alias to json, write json back to file
 

@@ -59,9 +59,11 @@ fn main() {
             Command::new("sync")
                 .about("Sync aliases between json file and alias file")
                 .arg(
-                    Arg::new("file")
-                        .help("The file to sync with")
-                        .required(true),
+                    Arg::new("force")
+                        .long("force")
+                        .short('f')
+                        .help("Force sync")
+                        .action(ArgAction::SetTrue),
                 ),
         )
         // TODO: Impliment these commands
@@ -98,7 +100,8 @@ fn main() {
             crate::manage::toggle_alias_command(JSON_FILE, ALIAS_FILE, name);
         }
         Some(("sync", sub_m)) => {
-            let file = sub_m.get_one::<String>("file").unwrap();
+            let force: bool = *sub_m.get_one::<bool>("force").unwrap_or(&false);
+            crate::sync::sync_aliases(JSON_FILE, ALIAS_FILE, force);
         }
         _ => {
             panic!("Invalid command");

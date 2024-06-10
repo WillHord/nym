@@ -16,4 +16,3 @@ pub struct Alias {
 pub struct AliasData {
     pub aliases: Vec<Alias>,
 }
-
