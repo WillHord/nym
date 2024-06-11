@@ -11,14 +11,6 @@ use crate::list::list_aliases;
 use clap::{Arg, ArgAction, Command};
 use console::style;
 
-// const JSON_FILE: &str = ".aliases.json"; // This should be in the home directory
-// const JSON_FILE: &str = dirs::home_dir()
-//     .unwrap()
-//     .join(".aliases.json")
-//     .to_str()
-//     .unwrap();
-const ALIAS_FILE: &str = ".aliases";
-
 fn main() {
     let matches = Command::new("nym")
         .version("0.1.0")

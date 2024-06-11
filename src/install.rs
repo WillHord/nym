@@ -4,14 +4,6 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use console::style;
-use dialoguer::Input;
-
-pub enum Shell {
-    Bash,
-    Zsh,
-    // fish,
-    None,
-}
 
 fn check_installed(shell_profile: &str) -> bool {
     // Check if the program is already installed
@@ -95,12 +87,12 @@ pub fn install(json_file: &str, shell_profile: &str) {
         .append(true)
         .open(shell_profile)
         .unwrap();
-    let to_write: String = format!("\n# Nym Alias File:\nsource {}\n", source_command);
+    let to_write: String = format!("\n# Nym Alias File:\n{}\n", source_command);
 
     // Check if the source command is already in the shell profile file
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
-    if contents.contains(source_command) {
+    if contents.contains(&to_write) {
         eprintln!(
             "{} Source command already in shell profile file",
             style("Error:").red().bold()
@@ -113,6 +105,12 @@ pub fn install(json_file: &str, shell_profile: &str) {
 
     // set alias file in nymdata
     crate::file_management::json::set_alias_file(json_file, alias_file.to_str().unwrap());
+
+    println!(
+        "{} Nym installed successfully\nPlease restart you shell to complete the installation: {}",
+        style("Success:").green().bold(),
+        style("`exec $SHELL`").bold()
+    );
 }
 
 // pub fn check_env() -> Shell {
@@ -134,31 +132,33 @@ pub fn install(json_file: &str, shell_profile: &str) {
 
 pub fn uninstall(json_file: &str, shell_profile: &str) {
     // Remove alias file located in json_file.alias_file
+    // Remove json file
     // Remove source command from shell profile file located in shell_profile
+
+    // Make sure nym is installed
+    if !check_installed(shell_profile) {
+        eprintln!("{} Nym is not installed", style("Error:").red().bold());
+        std::process::exit(1);
+    }
 
     let alias_file = crate::file_management::json::get_alias_file(json_file);
     let alias_file = alias_file.as_str();
 
-    // // Remove alias file
-    // match std::fs::remove_file(alias_file) {
-    //     Ok(_) => Ok(()),
-    //     Err(err) => {
-    //         if err == std::io::Error::from(std::io::ErrorKind::NotFound) {
-    //             eprintln!(
-    //                 "{} Alias file not found. Nothing to uninstall",
-    //                 style("Error:").yellow().bold()
-    //             );
-    //         }
-    //         println!(
-    //             "{} Error removing alias file",
-    //             style("Warning:").red().bold()
-    //         );
-    //     }
-    // };
-
     match std::fs::remove_file(alias_file) {
         Ok(_) => println!(
-            "{} File removed successfully.",
+            "{} Nym aliases file removed successfully.",
+            style("Success:").green().bold()
+        ),
+        Err(e) => eprintln!(
+            "{} Failed to remove file: {}",
+            style("Warning:").bold().yellow(),
+            e
+        ),
+    }
+
+    match std::fs::remove_file(json_file) {
+        Ok(_) => println!(
+            "{} Nym config file removed successfully.",
             style("Success:").green().bold()
         ),
         Err(e) => eprintln!(
@@ -187,6 +187,12 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
         println!("{}", source_command);
         std::process::exit(1);
     }
+
+    file = std::fs::OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(shell_profile)
+        .unwrap();
 
     contents = contents.replace(&source_command, "");
     file.write_all(contents.as_bytes())

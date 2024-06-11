@@ -57,8 +57,8 @@ pub fn add_alias_command(
         style("Success").green().bold()
     );
     println!(
-        "Please run {} to activate the alias",
-        style("exec \"$SHELL\"").bold().italic()
+        "Please run {} to activate changes",
+        style("`exec \"$SHELL\"`").bold().italic()
     );
 }
 
@@ -98,6 +98,10 @@ pub fn remove_alias_command(json_file: &str, alias_file: &str, name: &str) {
         "{}: Alias removed successfully",
         style("Success").green().bold()
     );
+    println!(
+        "Please run {} to activate changes",
+        style("`exec \"$SHELL\"`").bold().italic()
+    );
 }
 
 pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
@@ -133,5 +137,9 @@ pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
         } else {
             style("disabled").bold().red()
         }
+    );
+    println!(
+        "Please run {} to activate changes",
+        style("`exec \"$SHELL\"`").bold().italic()
     );
 }
