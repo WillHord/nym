@@ -3,13 +3,13 @@ use dialoguer::Confirm;
 
 use crate::file_management::aliases::{append_alias_to_alias_file, get_aliases_from_alias_file};
 use crate::file_management::json::{add_alias, get_aliases_from_file, set_alias_by_name};
-use crate::file_management::{Alias, AliasData};
+use crate::file_management::{Alias, NymData};
 
 pub fn sync_aliases(json_file: &str, alias_file: &str, force: bool) {
     // Check for inconsistencies between alias file and json file
 
     let aliases: Vec<Alias> = get_aliases_from_alias_file(alias_file);
-    let mut json: AliasData = get_aliases_from_file(json_file);
+    let mut json: NymData = get_aliases_from_file(json_file);
 
     // get aliases in aliases file that are not in json file
     let aliases_not_in_json: Vec<Alias> = aliases
@@ -78,7 +78,7 @@ mod sync_tests {
         append_alias_to_alias_file, get_aliases_from_alias_file, write_aliases_to_alias_file,
     };
     use crate::file_management::json::get_aliases_from_file;
-    use crate::file_management::{Alias, AliasData};
+    use crate::file_management::{Alias, NymData};
 
     #[test]
     fn json_alias_mismatch() {
@@ -93,8 +93,9 @@ mod sync_tests {
             enabled: true,
         };
 
-        let aliases = AliasData {
+        let aliases = NymData {
             aliases: vec![alias.clone()],
+            alias_file: alias_file.to_string(),
         };
 
         write_aliases_to_alias_file(aliases.aliases.clone(), alias_file);
@@ -123,8 +124,9 @@ mod sync_tests {
             enabled: true,
         };
 
-        let aliases = AliasData {
+        let aliases = NymData {
             aliases: vec![alias.clone()],
+            alias_file: alias_file.to_string(),
         };
 
         write_aliases_to_alias_file(aliases.aliases.clone(), alias_file);
@@ -151,8 +153,9 @@ mod sync_tests {
             enabled: true,
         };
 
-        let aliases = AliasData {
+        let aliases = NymData {
             aliases: vec![alias.clone()],
+            alias_file: alias_file.to_string(),
         };
 
         write_aliases_to_alias_file(aliases.aliases.clone(), alias_file);

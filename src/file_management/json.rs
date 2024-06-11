@@ -1,19 +1,32 @@
-use crate::file_management::{Alias, AliasData};
+use crate::file_management::{Alias, NymData};
 
-pub fn get_aliases_from_file(file: &str) -> AliasData {
+pub fn get_aliases_from_file(file: &str) -> NymData {
     let json = match std::fs::read_to_string(file) {
         Ok(json) => json,
         Err(_) => "{}".to_string(),
     };
 
-    let data: AliasData = match serde_json::from_str(&json) {
+    let data: NymData = match serde_json::from_str(&json) {
         Ok(data) => data,
-        Err(_) => AliasData {
+        Err(_) => NymData {
             aliases: Vec::new(),
+            alias_file: "".to_string(),
         },
     };
 
     data
+}
+
+pub fn get_alias_file(file: &str) -> String {
+    let json = get_aliases_from_file(file);
+    json.alias_file
+}
+
+pub fn set_alias_file(json_file: &str, file_path: &str) {
+    let mut json = get_aliases_from_file(json_file);
+    json.alias_file = file_path.to_string();
+    let json = serde_json::to_string_pretty(&json).unwrap();
+    std::fs::write(json_file, json).expect("Error writing to file");
 }
 
 pub fn check_alias_exists(name: &str, file: &str) -> bool {
@@ -78,10 +91,11 @@ pub fn add_alias(alias: &Alias, file: &str) {
         json = "{}".to_string();
     }
 
-    let mut data: AliasData = match serde_json::from_str(&json) {
+    let mut data: NymData = match serde_json::from_str(&json) {
         Ok(data) => data,
-        Err(_) => AliasData {
+        Err(_) => NymData {
             aliases: Vec::new(),
+            alias_file: "".to_string(),
         },
     };
 
@@ -110,8 +124,9 @@ mod tests {
             description: "A test alias".to_string(),
             enabled: true,
         };
-        let correct = AliasData {
+        let correct = NymData {
             aliases: vec![alias.clone()],
+            alias_file: "".to_string(),
         };
         add_alias(&alias, "test1.json");
         let contents = get_aliases_from_file("test1.json");
@@ -138,8 +153,9 @@ mod tests {
             enabled: true,
         };
 
-        let mut correct = AliasData {
+        let mut correct = NymData {
             aliases: vec![alias1.clone()],
+            alias_file: "".to_string(),
         };
 
         add_alias(&alias1, file);
@@ -171,12 +187,14 @@ mod tests {
             enabled: true,
         };
 
-        let correct1 = AliasData {
+        let correct1 = NymData {
             aliases: vec![alias1.clone()],
+            alias_file: "".to_string(),
         };
 
-        let correct2 = AliasData {
+        let correct2 = NymData {
             aliases: vec![alias1.clone(), alias2.clone()],
+            alias_file: "".to_string(),
         };
 
         add_alias(&alias1, file);

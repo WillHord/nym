@@ -9,8 +9,14 @@ mod sync;
 use crate::list::list_aliases;
 
 use clap::{Arg, ArgAction, Command};
+use console::style;
 
-const JSON_FILE: &str = ".aliases.json";
+// const JSON_FILE: &str = ".aliases.json"; // This should be in the home directory
+// const JSON_FILE: &str = dirs::home_dir()
+//     .unwrap()
+//     .join(".aliases.json")
+//     .to_str()
+//     .unwrap();
 const ALIAS_FILE: &str = ".aliases";
 
 fn main() {
@@ -66,13 +72,20 @@ fn main() {
                         .action(ArgAction::SetTrue),
                 ),
         )
-        // TODO: Impliment these commands
-        // .subcommand(
-        //     Command::new("install")
-        // )
-        // .subcommand(
-        //     Command::new("uninstall")
-        // )
+        .subcommand(
+            Command::new("install").about("Install Nym").arg(
+                Arg::new("shell_profile")
+                    .help("The shell profile file to install Nym. E.g. .bashrc, .zshrc")
+                    .required(true),
+            ),
+        )
+        .subcommand(
+            Command::new("uninstall").about("Uninstall Nym").arg(
+                Arg::new("shell_profile")
+                    .help("The shell profile file to uninstall Nym. E.g. .bashrc, .zshrc")
+                    .required(true),
+            ),
+        )
         .subcommand(
             Command::new("man")
                 .about("Open up description of alias")
@@ -84,38 +97,69 @@ fn main() {
         )
         .get_matches();
 
+    // Get json and alias files - if they don't exist throw error (unless subcommand install is called)
+    let home_dir = dirs::home_dir().unwrap();
+    let json_file_path: String = home_dir
+        .join(".aliases.json")
+        .into_os_string()
+        .into_string()
+        .unwrap();
+    let json_file: &str = json_file_path.as_str();
+
+    let alias_file: String = crate::file_management::json::get_alias_file(json_file);
+    if alias_file.is_empty() && matches.subcommand().unwrap().0 != "install" {
+        eprintln!(
+            "{}: Alias file not found. Please run {} to create the alias file",
+            style("Error").red().bold(),
+            style("`nym install`").bold()
+        );
+        std::process::exit(1);
+    };
+    let alias_file: &str = alias_file.as_str();
+
     match matches.subcommand() {
         Some(("list", flags)) => {
             println!("Listing  aliases");
             list_aliases(
-                JSON_FILE,
+                json_file,
                 *flags.get_one::<bool>("disabled").unwrap_or(&false),
             );
         }
         Some(("add", sub_m)) => {
             let command = sub_m.get_one::<String>("command").unwrap();
             let description = sub_m.get_one::<String>("description");
-            crate::manage::add_alias_command(JSON_FILE, ALIAS_FILE, command, description);
+            crate::manage::add_alias_command(json_file, alias_file, command, description);
         }
         Some(("rm", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::manage::remove_alias_command(JSON_FILE, ALIAS_FILE, name);
+            crate::manage::remove_alias_command(json_file, alias_file, name);
         }
         Some(("toggle", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::manage::toggle_alias_command(JSON_FILE, ALIAS_FILE, name);
+            crate::manage::toggle_alias_command(json_file, alias_file, name);
         }
         Some(("sync", sub_m)) => {
             let force: bool = *sub_m.get_one::<bool>("force").unwrap_or(&false);
-            crate::sync::sync_aliases(JSON_FILE, ALIAS_FILE, force);
+            crate::sync::sync_aliases(json_file, alias_file, force);
         }
         Some(("man", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::list::alias_manual(JSON_FILE, name);
+            crate::list::alias_manual(json_file, name);
+        }
+        Some(("install", sub_m)) => {
+            let shell_profile = sub_m.get_one::<String>("shell_profile").unwrap();
+            crate::install::install(json_file, shell_profile);
+        }
+        Some(("uninstall", sub_m)) => {
+            let shell_profile = sub_m.get_one::<String>("shell_profile").unwrap();
+            crate::install::uninstall(json_file, shell_profile);
         }
         _ => {
-            panic!("Invalid command");
-            // println!("TODO: Open up manager")
+            eprintln!(
+                "{} No command provided. Please run {} for help",
+                style("Error:").red().bold(),
+                style("`nym --help`").bold()
+            );
         }
     }
 }

@@ -13,6 +13,7 @@ pub struct Alias {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
-pub struct AliasData {
+pub struct NymData {
     pub aliases: Vec<Alias>,
+    pub alias_file: String,
 }
