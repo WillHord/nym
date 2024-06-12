@@ -126,7 +126,7 @@ To build and install nym follow these simple steps.
 ## Roadmap
 
 - [ ] Alias manager interface (allow for user to toggle, add, and delete all within one command)
-- [ ] Rename command for aliases
+- [x] Rename command for aliases
 - [ ] Better installation (brew, cargo, packman, etc.)
 - [ ] Download aliases from git repos
 - [ ] Manage more parts of shell env
