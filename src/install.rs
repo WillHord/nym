@@ -141,6 +141,19 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
         std::process::exit(1);
     }
 
+    // Ask for confirmation
+    let confirm = dialoguer::Confirm::new()
+        .with_prompt(
+            "Are you sure you want to uninstall Nym and delete all aliases created with Nym?",
+        )
+        .interact()
+        .unwrap();
+
+    if !confirm {
+        eprintln!("{}", style("Exiting").italic());
+        std::process::exit(1);
+    }
+
     let alias_file = crate::file_management::json::get_alias_file(json_file);
     let alias_file = alias_file.as_str();
 

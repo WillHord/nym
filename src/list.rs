@@ -1,24 +1,21 @@
 use crate::file_management::json::{fuzzy_get_alias, get_aliases_from_file};
 
 use console::style;
-use termion::color;
 
 pub fn list_aliases(file: &str, disabled: bool) {
     let aliases = get_aliases_from_file(file);
     for alias in aliases.aliases {
         if alias.enabled && !disabled {
             println!(
-                "✅ {}{} -> {}",
-                color::Fg(color::Green),
-                alias.name,
-                alias.command
+                "✅ {}-> {}",
+                style(alias.name).green(),
+                style(alias.command).green()
             );
         } else if !alias.enabled {
             println!(
-                "❌ {}{} -> {} ",
-                color::Fg(color::Red),
-                alias.name,
-                alias.command
+                "❌ {} -> {} ",
+                style(alias.name).red(),
+                style(alias.command).red()
             );
         }
     }
