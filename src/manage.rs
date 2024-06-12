@@ -143,3 +143,38 @@ pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
         style("`exec \"$SHELL\"`").bold().italic()
     );
 }
+
+pub fn rename_alias(json_file: &str, alias_file: &str, old_name: &str, new_name: &str) {
+    // Rename alias by name
+    let mut alias: Alias = match fuzzy_get_alias(old_name, json_file) {
+        Some(alias) => alias,
+        None => panic!("Alias not found"),
+    };
+
+    if alias.name != old_name && !confirm_alias(&alias) {
+        eprintln!(
+            "{}{}",
+            style("Error:").red().bold(),
+            style("Please Try again with a different alias").red()
+        );
+        std::process::exit(1);
+    }
+
+    remove_alias_by_name(&alias.name, json_file);
+    remove_alias_from_alias_file(&alias.name, alias_file);
+    alias.name = new_name.to_string();
+    append_alias_to_alias_file(&alias, alias_file);
+    add_alias(&alias, json_file);
+
+    println!(
+        "{} Alias {} has been renamed to {}",
+        style("Success:").green().bold(),
+        style(old_name).italic().bold(),
+        style(new_name).italic().bold()
+    );
+    println!(
+        "Please run {} to activate changes",
+        style("`exec \"$SHELL\"`").bold().italic()
+    );
+}
+

@@ -47,6 +47,20 @@ fn main() {
             ),
         )
         .subcommand(
+            Command::new("rename")
+                .about("Rename an alias")
+                .arg(
+                    Arg::new("old_name")
+                        .help("The name of the alias to rename")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("new_name")
+                        .help("The new name of the alias")
+                        .required(true),
+                ),
+        )
+        .subcommand(
             Command::new("toggle").about("Toggle an alias by name").arg(
                 Arg::new("name")
                     .help("The name of the alias to toggle")
@@ -145,6 +159,11 @@ fn main() {
         Some(("uninstall", sub_m)) => {
             let shell_profile = sub_m.get_one::<String>("shell_profile").unwrap();
             crate::install::uninstall(json_file, shell_profile);
+        }
+        Some(("rename", sub_m)) => {
+            let old_name = sub_m.get_one::<String>("old_name").unwrap();
+            let new_name = sub_m.get_one::<String>("new_name").unwrap();
+            crate::manage::rename_alias(json_file, alias_file, old_name, new_name);
         }
         _ => {
             eprintln!(
