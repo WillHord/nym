@@ -51,8 +51,6 @@
 
 Pseudo-Nym is a small but powerful alias manager for Unix-based operating systems built in Rust. It was created to simplify and streamline your shell experience by providing a quick and easy way to create, manage, and document your shell aliases. Nym allows the user to create an alias and its description with one command, toggle it on and off, list all aliases, and more.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- GETTING STARTED -->
 
 ## Getting Started
@@ -81,8 +79,6 @@ To build and install nym follow these simple steps.
    ```sh
    nym install <path_to_shell_profile>
    ```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 
@@ -125,8 +121,6 @@ To build and install nym follow these simple steps.
   nym sync
   ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- ROADMAP -->
 
 ## Roadmap
@@ -141,8 +135,6 @@ To build and install nym follow these simple steps.
 
 See the [open issues](https://github.com/WillHord/nym/issues) for a full list of proposed features and known issues.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- CONTRIBUTING -->
 
 ## Contributing
@@ -155,15 +147,11 @@ If you have a suggestion that would make this better, please fork the repo and c
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- LICENSE -->
 
 ## License
 
 Distributed under the GNU GPL v3 License. See [LICENSE](https://github.com/WillHord/nym/blob/main/LICENSE) for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
@@ -177,3 +165,5 @@ Distributed under the GNU GPL v3 License. See [LICENSE](https://github.com/WillH
 [issues-shield]: https://img.shields.io/github/issues/WillHord/nym.svg?style=for-the-badge
 [issues-url]: https://github.com/WillHord/nym/issues
 [product-screenshot]: images/screenshot.png
+[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
+[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
