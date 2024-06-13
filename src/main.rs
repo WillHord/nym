@@ -2,11 +2,11 @@ extern crate clap;
 
 mod file_management;
 
+mod commands;
 mod install;
 mod list;
-mod manage;
+mod manager;
 mod sync;
-use crate::list::list_aliases;
 
 use clap::{Arg, ArgAction, Command};
 use console::style;
@@ -126,7 +126,7 @@ fn main() {
     match matches.subcommand() {
         Some(("list", flags)) => {
             println!("Listing  aliases");
-            list_aliases(
+            crate::list::list_aliases(
                 json_file,
                 *flags.get_one::<bool>("disabled").unwrap_or(&false),
             );
@@ -134,15 +134,15 @@ fn main() {
         Some(("add", sub_m)) => {
             let command = sub_m.get_one::<String>("command").unwrap();
             let description = sub_m.get_one::<String>("description");
-            crate::manage::add_alias_command(json_file, alias_file, command, description);
+            crate::commands::add_alias_command(json_file, alias_file, command, description);
         }
         Some(("rm", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::manage::remove_alias_command(json_file, alias_file, name);
+            crate::commands::remove_alias_command(json_file, alias_file, name);
         }
         Some(("toggle", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::manage::toggle_alias_command(json_file, alias_file, name);
+            crate::commands::toggle_alias_command(json_file, alias_file, name);
         }
         Some(("sync", sub_m)) => {
             let force: bool = *sub_m.get_one::<bool>("force").unwrap_or(&false);
@@ -163,14 +163,10 @@ fn main() {
         Some(("rename", sub_m)) => {
             let old_name = sub_m.get_one::<String>("old_name").unwrap();
             let new_name = sub_m.get_one::<String>("new_name").unwrap();
-            crate::manage::rename_alias(json_file, alias_file, old_name, new_name);
+            crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
         }
         _ => {
-            eprintln!(
-                "{} No command provided. Please run {} for help",
-                style("Error:").red().bold(),
-                style("`nym --help`").bold()
-            );
+            crate::manager::alias_manager(json_file, alias_file);
         }
     }
 }

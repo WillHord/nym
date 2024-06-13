@@ -134,6 +134,7 @@ To build and install nym follow these simple steps.
 - [ ] Alias manager interface (allow for user to toggle, add, and delete all within one command)
 - [x] Rename command for aliases
 - [ ] Better installation (brew, cargo, packman, etc.)
+- [ ] Test on other shell environments (other than bash, and zsh)
 - [ ] Download aliases from git repos
 - [ ] Manage more parts of shell env
   - [ ] Api keys, secrets, etc

@@ -24,6 +24,8 @@ pub fn add_alias_command(
     command: &str,
     description: Option<&String>,
 ) {
+    // TODO: make better alias validation
+    
     // Check if command is in fotmat alias_name="command"
     // If not, add quotes around command
 
