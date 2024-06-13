@@ -96,6 +96,12 @@ To build and install nym follow these simple steps.
   # Eample
   nym toggle example
   ```
+- Rename alias
+  ```sh
+  nym rename <old_alias_name> <new_alias_name>
+  # Eample
+  nym rename example example2
+  ```
 - Remove alias
   ```sh
   nym rm <alias_name>
@@ -117,7 +123,7 @@ To build and install nym follow these simple steps.
   ```
 - Sync aliases
   ```sh
-  # Sync looks for discrepancies between the alias file and the json config file and updates accordingly
+  # The Sync command finds discrepancies between the alias file and the json config file and updates accordingly
   nym sync
   ```
 
