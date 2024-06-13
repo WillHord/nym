@@ -51,6 +51,8 @@
 
 Pseudo-Nym is a small but powerful alias manager for Unix-based operating systems built in Rust. It was created to simplify and streamline your shell experience by providing a quick and easy way to create, manage, and document your shell aliases. Nym allows the user to create an alias and its description with one command, toggle it on and off, list all aliases, and more.
 
+_Currently Nym has only been tested on **zsh** and **bash** shell environments._
+
 <!-- GETTING STARTED -->
 
 ## Getting Started
@@ -131,14 +133,14 @@ To build and install nym follow these simple steps.
 
 ## Roadmap
 
-- [ ] Alias manager interface (allow for user to toggle, add, and delete all within one command)
+- [x] Alias manager interface (allow for user to toggle, add, and delete all within one command)
 - [x] Rename command for aliases
 - [ ] Better installation (brew, cargo, packman, etc.)
 - [ ] Test on other shell environments (other than bash, and zsh)
-- [ ] Download aliases from git repos
+- [ ] Download aliases from web (github repos)
 - [ ] Manage more parts of shell env
   - [ ] Api keys, secrets, etc
-- [ ] Project based aliases (enable sorting aliases and toggling in groups)
+- [ ] Aliases groups (enable sorting aliases and toggling in groups)
 
 See the [open issues](https://github.com/WillHord/nym/issues) for a full list of proposed features and known issues.
 
