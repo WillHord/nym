@@ -25,14 +25,20 @@ pub fn add_alias_command(
     description: Option<&String>,
 ) {
     // TODO: make better alias validation
-    
+    // TODO: Allow for "alias alias_name="command"" and strip the initial alias
+
     // Check if command is in fotmat alias_name="command"
     // If not, add quotes around command
 
     let alias_command = if command.contains('=') {
         command.to_string()
     } else {
-        panic!("Command must be in format alias_name=\"command\"");
+        println!(
+            "{}: {}",
+            style("Error").red().bold(),
+            style("Command must be in format alias_name=\"command\"")
+        );
+        return;
     };
 
     let name: &str = alias_command.split('=').collect::<Vec<&str>>()[0];
@@ -179,4 +185,3 @@ pub fn rename_alias(json_file: &str, alias_file: &str, old_name: &str, new_name:
         style("`exec \"$SHELL\"`").bold().italic()
     );
 }
-

@@ -59,6 +59,15 @@ fn get_manager_option() -> ManagerOption {
 fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
     let aliases = crate::file_management::json::get_aliases_from_file(json_file);
 
+    if aliases.aliases.is_empty() {
+        println!(
+            "{}: {}",
+            style("Error").red().bold(),
+            style("Could not find any aliases to remove")
+        );
+        return;
+    }
+
     let alias_names: Vec<String> = aliases
         .aliases
         .iter()
@@ -91,6 +100,15 @@ fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
 
 fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
     let aliases = crate::file_management::json::get_aliases_from_file(json_file);
+
+    if aliases.aliases.is_empty() {
+        println!(
+            "{}: {}",
+            style("Error").red().bold(),
+            style("Could not find any aliases to toggle")
+        );
+        return;
+    }
 
     // Alias_names should be a vector of strings of the names of the aliases as well as if they are disabled or not
     let alias_names: Vec<String> = aliases
@@ -135,6 +153,15 @@ fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
 fn rename_alias(json_file: &str, alias_file: &str) {
     let aliases = crate::file_management::json::get_aliases_from_file(json_file);
 
+    if aliases.aliases.is_empty() {
+        println!(
+            "{}: {}",
+            style("Error").red().bold(),
+            style("Could not find any aliases to rename")
+        );
+        return;
+    }
+
     let alias_names: Vec<String> = aliases
         .aliases
         .iter()
@@ -160,7 +187,23 @@ pub fn alias_manager(json_file: &str, alias_file: &str) {
                 crate::list::list_aliases(json_file, false);
             }
             ManagerOption::AddAlias => {
-                let command = inquire::Text::new("Enter the command").prompt().unwrap();
+                let command = match inquire::Text::new("Enter the command").prompt() {
+                    Ok(cmd) => {
+                        if !cmd.is_empty() {
+                            cmd
+                        } else {
+                            println!(
+                                "{}: {}",
+                                style("Error").red().bold(),
+                                style("Please enter a valid command")
+                            );
+                            continue;
+                        }
+                    }
+                    Err(_) => {
+                        return;
+                    }
+                };
                 let description = inquire::Text::new("Enter the description")
                     .prompt()
                     .unwrap();
