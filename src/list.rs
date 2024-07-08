@@ -4,6 +4,14 @@ use console::style;
 
 pub fn list_aliases(file: &str, disabled: bool) {
     let aliases = get_aliases_from_file(file);
+    if aliases.aliases.is_empty() {
+        println!(
+            "{}: {}",
+            style("Warning").yellow().bold(),
+            style("No aliases found")
+        );
+        return;
+    }
     for alias in aliases.aliases {
         if alias.enabled && !disabled {
             println!(

@@ -113,11 +113,13 @@ fn main() {
     let json_file: &str = json_file_path.as_str();
 
     let alias_file: String = crate::file_management::json::get_alias_file(json_file);
-    if alias_file.is_empty() && matches.subcommand().unwrap().0 != "install" {
+    if alias_file.is_empty()
+        && (matches.subcommand().is_none() || matches.subcommand().unwrap().0 != "install")
+    {
         eprintln!(
             "{}: Alias file not found. Please run {} to create the alias file",
             style("Error").red().bold(),
-            style("`nym install`").bold()
+            style("`nym install <shell_profile>`").bold()
         );
         std::process::exit(1);
     };
