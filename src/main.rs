@@ -180,12 +180,12 @@ fn main() {
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
         }
         Some(("test", sub_m)) => {
-            helpers::messages::error!(style("This is a test"));
+            helpers::messages::error!("This is a test");
             helpers::messages::error!(style("This is another test").bold().blue());
-            helpers::messages::error!(style("Exit early"), true);
-            helpers::messages::error!(style(
-                format!("This is {}", style("green").green().italic()).as_str()
-            ));
+            // helpers::messages::error!(style("Exit early"), true);
+            // helpers::messages::error!(style(
+            //     format!("This is {}", style("green").green().italic()).as_str()
+            // ));
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);

@@ -25,11 +25,37 @@ pub fn print_error(message: StyledObject<&str>, exit: bool) {
 
 #[macro_export]
 macro_rules! error {
-    ($message: expr) => {
-        crate::helpers::messages::print_error($message, false);
-    };
+    ($message: expr) => {{
+        use console::{style, StyledObject};
+        use std::any::Any;
+
+        let val = &$message;
+        if let Some(s) = (val as &dyn Any).downcast_ref::<&str>() {
+            println!("String: {}", s);
+            helpers::messages::print_error(style(s), false)
+        } else if let Some(styled) = (val as &dyn Any).downcast_ref::<StyledObject<&str>>() {
+            println!("StyledObject: {}", styled);
+            helpers::messages::print_error(styled, false)
+        }
+    }};
     ($message: expr, $exit: expr) => {
-        crate::helpers::messages::print_error($message, $exit);
+        helpers::messages::print_error($message, $exit);
+    };
+}
+// #[macro_export]
+// macro_rules! error {
+//     ($message: expr) => {
+//         helpers::messages::print_error($message, false);
+//     };
+//     ($message: expr, $exit: expr) => {
+//         helpers::messages::print_error($message, $exit);
+//     };
+// }
+
+#[macro_export]
+macro_rules! success {
+    ($message: expr) => {
+        helpers::messages::success($message)
     };
 }
 
