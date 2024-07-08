@@ -1,6 +1,7 @@
 extern crate clap;
 
 mod file_management;
+mod helpers;
 
 mod commands;
 mod install;
@@ -101,6 +102,7 @@ fn main() {
                         .help("The name of the alias to view description of"),
                 ),
         )
+        .subcommand(Command::new("test"))
         .get_matches();
 
     // Get json and alias files - if they don't exist throw error (unless subcommand install is called)
@@ -116,12 +118,22 @@ fn main() {
     if alias_file.is_empty()
         && (matches.subcommand().is_none() || matches.subcommand().unwrap().0 != "install")
     {
-        eprintln!(
-            "{}: Alias file not found. Please run {} to create the alias file",
-            style("Error").red().bold(),
-            style("`nym install <shell_profile>`").bold()
+        helpers::messages::error!(
+            style(
+                format!(
+                    "Alias file not found. Please run {} to create the alias file",
+                    style("`nym install <shell_profile>`").bold()
+                )
+                .as_str()
+            ),
+            true
         );
-        std::process::exit(1);
+        // eprintln!(
+        //     "{}: Alias file not found. Please run {} to create the alias file",
+        //     style("Error").red().bold(),
+        //     style("`nym install <shell_profile>`").bold()
+        // );
+        // std::process::exit(1);
     };
     let alias_file: &str = alias_file.as_str();
 
@@ -166,6 +178,14 @@ fn main() {
             let old_name = sub_m.get_one::<String>("old_name").unwrap();
             let new_name = sub_m.get_one::<String>("new_name").unwrap();
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
+        }
+        Some(("test", sub_m)) => {
+            helpers::messages::error!(style("This is a test"));
+            helpers::messages::error!(style("This is another test").bold().blue());
+            helpers::messages::error!(style("Exit early"), true);
+            helpers::messages::error!(style(
+                format!("This is {}", style("green").green().italic()).as_str()
+            ));
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);
