@@ -62,6 +62,7 @@ To build and install nym follow these simple steps.
 ### Prerequisites
 
 - [Rust](https://www.rust-lang.org/tools/install) and Cargo
+
   ```sh
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   ```
@@ -69,15 +70,20 @@ To build and install nym follow these simple steps.
 ### Installation
 
 1. Clone the repo
+
    ```sh
    git clone https://github.com/WillHord/nym.git
    ```
+
 2. Build nym and move binary to bin
+
    ```sh
    cargo build --release
    cp target/release/nym /usr/local/bin/nym
    ```
+
 3. Run install command with shell profile
+
    ```sh
    nym install <path_to_shell_profile>
    ```
@@ -87,43 +93,56 @@ To build and install nym follow these simple steps.
 ## Usage
 
 - Add an alias
+
   ```sh
   nym add <alias> <description>
   # Eample
   nym add example="echo 'testing'" "This is an example alias"
   ```
+
 - Toggle alias
+
   ```sh
   nym toggle <alias_name>
   # Eample
   nym toggle example
   ```
+
 - Rename alias
+
   ```sh
   nym rename <old_alias_name> <new_alias_name>
   # Eample
   nym rename example example2
   ```
+
 - Remove alias
+
   ```sh
   nym rm <alias_name>
   # Eample
   nym rm example
   ```
+
 - View alias description
+
   ```sh
   nym man <alias_name>
   # Eample
   nym man example
   ```
+
 - List all aliases
+
   ```sh
   nym list <optional flags>
   # Eamples
   nym list
   nym list --disabled
   ```
+
 - Sync aliases
+
   ```sh
   # The Sync command finds discrepancies between the alias file and the json config file and updates accordingly
   nym sync
@@ -135,6 +154,7 @@ To build and install nym follow these simple steps.
 
 - [x] Alias manager interface (allow for user to toggle, add, and delete all within one command)
 - [x] Rename command for aliases
+- [ ] Manage Scripts as well as Aliases
 - [ ] Better installation (brew, cargo, packman, etc.)
 - [ ] Test on other shell environments (other than bash, and zsh)
 - [ ] Download aliases from web (github repos)
@@ -165,14 +185,7 @@ Distributed under the GNU GPL v3 License. See [LICENSE](https://github.com/WillH
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/WillHord/nym.svg?style=for-the-badge
-[contributors-url]: https://github.com/WillHord/nym/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/WillHord/nym.svg?style=for-the-badge
-[forks-url]: https://github.com/WillHord/nym/network/members
-[stars-shield]: https://img.shields.io/github/stars/WillHord/nym.svg?style=for-the-badge
-[stars-url]: https://github.com/WillHord/nym/stargazers
 [issues-shield]: https://img.shields.io/github/issues/WillHord/nym.svg?style=for-the-badge
 [issues-url]: https://github.com/WillHord/nym/issues
-[product-screenshot]: images/screenshot.png
 [license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
 [license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
