@@ -31,16 +31,32 @@ macro_rules! error {
 
         let val = &$message;
         if let Some(s) = (val as &dyn Any).downcast_ref::<&str>() {
-            println!("String: {}", s);
             helpers::messages::print_error(style(s), false)
         } else if let Some(styled) = (val as &dyn Any).downcast_ref::<StyledObject<&str>>() {
-            println!("StyledObject: {}", styled);
-            helpers::messages::print_error(styled, false)
+            helpers::messages::print_error(styled.clone(), false)
+        } else {
+            panic!("Error requires either a &str or a StyledObject");
         }
     }};
-    ($message: expr, $exit: expr) => {
-        helpers::messages::print_error($message, $exit);
-    };
+    ($message: expr, $exit: expr) => {{
+        use console::{style, StyledObject};
+        use std::any::Any;
+        fn print_type_of<T>(_: &T) {
+            println!("{}", std::any::type_name::<T>())
+        }
+
+        // print_type_of($message);
+        let val = &$message;
+        if let Some(s) = (val as &dyn Any).downcast_ref::<&str>() {
+            helpers::messages::print_error(style(s), $exit)
+        } else if let Some(styled) = (val as &dyn Any).downcast_ref::<StyledObject<&str>>() {
+            helpers::messages::print_error(styled.clone(), $exit)
+        } else {
+            // helpers::messages::print_error($message, $exit)
+            // print_type_of($message);
+            // panic!("Error requires either a &str or a StyledObject");
+        }
+    }};
 }
 // #[macro_export]
 // macro_rules! error {
