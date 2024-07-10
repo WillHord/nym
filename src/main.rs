@@ -115,25 +115,17 @@ fn main() {
     let json_file: &str = json_file_path.as_str();
 
     let alias_file: String = crate::file_management::json::get_alias_file(json_file);
-    // if alias_file.is_empty()
-    //     && (matches.subcommand().is_none() || matches.subcommand().unwrap().0 != "install")
-    // {
-    let test = style("test").bold();
-    let test2 = style(format!("test {}", "Test"));
-    println!("HERE");
-    let msg = format!(
-        "Alias file not found. Please run {} to create the alias file",
-        style("`nym install <shell_profile>`").bold()
-    );
-    helpers::messages::error!("test", true);
-
-    // eprintln!(
-    //     "{}: Alias file not found. Please run {} to create the alias file",
-    //     style("Error").red().bold(),
-    //     style("`nym install <shell_profile>`").bold()
-    // );
-    // std::process::exit(1);
-    // };
+    if alias_file.is_empty()
+        && (matches.subcommand().is_none() || matches.subcommand().unwrap().0 != "install")
+    {
+        helpers::messages::error!(
+            format!(
+                "Alias file not found. Please run {} to create the alias file",
+                style("`nym install <shell_profile>`").bold()
+            ),
+            true
+        );
+    };
     let alias_file: &str = alias_file.as_str();
 
     match matches.subcommand() {
@@ -178,13 +170,11 @@ fn main() {
             let new_name = sub_m.get_one::<String>("new_name").unwrap();
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
         }
-        Some(("test", sub_m)) => {
+        Some(("test", _)) => {
             helpers::messages::error!("This is a test");
             helpers::messages::error!(style("This is another test").bold().blue());
-            // helpers::messages::error!(style("Exit early"), true);
-            // helpers::messages::error!(style(
-            //     format!("This is {}", style("green").green().italic()).as_str()
-            // ));
+            helpers::messages::success!("This is a success");
+            helpers::messages::warning!("This is a warning");
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);
