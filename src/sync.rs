@@ -4,6 +4,7 @@ use dialoguer::Confirm;
 use crate::file_management::aliases::{append_alias_to_alias_file, get_aliases_from_alias_file};
 use crate::file_management::json::{add_alias, get_aliases_from_file, set_alias_by_name};
 use crate::file_management::{Alias, NymData};
+use crate::success;
 
 pub fn sync_aliases(json_file: &str, alias_file: &str, force: bool) {
     // Check for inconsistencies between alias file and json file
@@ -64,10 +65,7 @@ pub fn sync_aliases(json_file: &str, alias_file: &str, force: bool) {
     }
 
     // Print Success message
-    println!(
-        "{}: Aliases synced successfully",
-        style("Success").green().bold()
-    );
+    success!("Aliases synced successfully");
 }
 
 #[cfg(test)]

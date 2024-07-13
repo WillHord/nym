@@ -1,14 +1,14 @@
 #[macro_export]
 macro_rules! success {
     ($message: expr) => {
-        println!("{}: {}", style("Success").bold().green(), $message);
+        println!("{}: {}", style("Success").bold().green(), $message)
     };
 }
 
 #[macro_export]
 macro_rules! error {
     ($message: expr) => {
-        println!("{}: {}", style("Error").bold().red(), $message);
+        eprintln!("{}: {}", style("Error").bold().red(), $message)
     };
     ($message: expr, $exit: expr) => {
         eprintln!("{}: {}", style("Error").bold().red(), $message);
@@ -21,7 +21,19 @@ macro_rules! error {
 #[macro_export]
 macro_rules! warning {
     ($message: expr) => {
-        println!("{}: {}", style("Warning").bold().yellow(), $message);
+        println!("{}: {}", style("Warning").bold().yellow(), $message)
+    };
+}
+
+#[macro_export]
+macro_rules! exit {
+    ($status: literal) => {
+        if $status != 0 {
+            eprintln!("{}", style("Exiting").italic());
+        } else {
+            println!("{}", style("Exiting").italic());
+        }
+        std::process::exit($status);
     };
 }
 

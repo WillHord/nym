@@ -5,6 +5,11 @@ use std::path::PathBuf;
 
 use console::style;
 
+use crate::error;
+use crate::exit;
+use crate::success;
+use crate::warning;
+
 fn check_installed(shell_profile: &str) -> bool {
     // Check if the program is already installed
     // If it is, return true
@@ -43,17 +48,12 @@ pub fn install(json_file: &str, shell_profile: &str) {
     // Check if shell_profile is valid
     let shell_profile = PathBuf::from(shell_profile);
     if !shell_profile.exists() {
-        eprintln!(
-            "{} Shell profile file does not exist",
-            style("Error:").red().bold()
-        );
-        std::process::exit(1);
+        error!("Shell profile file does not exist", true);
     }
 
     // Check if the program is already installed
     if check_installed(shell_profile.to_str().unwrap()) {
-        eprintln!("{} Nym is already installed", style("Error:").red().bold());
-        std::process::exit(1);
+        error!("Nym is already installed", true);
     }
 
     // create .nym_aliases file in home directory
@@ -63,7 +63,7 @@ pub fn install(json_file: &str, shell_profile: &str) {
     // If .alias file already exists, ask user if they want to overwirte it
     if alias_file.exists()
         && !dialoguer::Confirm::new()
-            .with_prompt("Alias file already exists. Do you want to overwrite it?")
+            .with_prompt("Alias file already exists. Do you want to overwrite it? [y/n]")
             .interact()
             .unwrap()
     {
@@ -93,11 +93,7 @@ pub fn install(json_file: &str, shell_profile: &str) {
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
     if contents.contains(&to_write) {
-        eprintln!(
-            "{} Source command already in shell profile file",
-            style("Error:").red().bold()
-        );
-        std::process::exit(1);
+        error!("Nym already installed in shell profile file", true);
     }
 
     file.write_all(to_write.as_bytes())
@@ -106,11 +102,10 @@ pub fn install(json_file: &str, shell_profile: &str) {
     // set alias file in nymdata
     crate::file_management::json::set_alias_file(json_file, alias_file.to_str().unwrap());
 
-    println!(
-        "{} Nym installed successfully\nPlease restart you shell to complete the installation: {}",
-        style("Success:").green().bold(),
+    success!(format!(
+        "Nym installed successfully\nPlease restart your shell to complete the installation {}",
         style("`exec $SHELL`").bold()
-    );
+    ));
 }
 
 // pub fn check_env() -> Shell {
@@ -137,8 +132,7 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
 
     // Make sure nym is installed
     if !check_installed(shell_profile) {
-        eprintln!("{} Nym is not installed", style("Error:").red().bold());
-        std::process::exit(1);
+        error!("Nym is not installed", true);
     }
 
     // Ask for confirmation
@@ -150,35 +144,20 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
         .unwrap();
 
     if !confirm {
-        eprintln!("{}", style("Exiting").italic());
-        std::process::exit(1);
+        exit!(1);
     }
 
     let alias_file = crate::file_management::json::get_alias_file(json_file);
     let alias_file = alias_file.as_str();
 
     match std::fs::remove_file(alias_file) {
-        Ok(_) => println!(
-            "{} Nym aliases file removed successfully.",
-            style("Success:").green().bold()
-        ),
-        Err(e) => eprintln!(
-            "{} Failed to remove file: {}",
-            style("Warning:").bold().yellow(),
-            e
-        ),
+        Ok(_) => success!("Nym aliases file removed successfully"),
+        Err(e) => warning!(format!("Failed to remove file: {}", e)),
     }
 
     match std::fs::remove_file(json_file) {
-        Ok(_) => println!(
-            "{} Nym config file removed successfully.",
-            style("Success:").green().bold()
-        ),
-        Err(e) => eprintln!(
-            "{} Failed to remove file: {}",
-            style("Warning:").bold().yellow(),
-            e
-        ),
+        Ok(_) => success!("Nym config file removed successfully"),
+        Err(e) => warning!(format!("Failed to remove file: {}", e)),
     }
 
     // Remove source command from shell profile file
@@ -193,12 +172,13 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
     if !contents.contains(&source_command) {
-        eprintln!(
-            "{} Source command not found in shell profile file",
-            style("Error:").red().bold()
+        error!(
+            format!(
+                "Source command not found in shell profile file\n{}",
+                source_command
+            ),
+            true
         );
-        println!("{}", source_command);
-        std::process::exit(1);
     }
 
     file = std::fs::OpenOptions::new()
@@ -211,5 +191,5 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
     file.write_all(contents.as_bytes())
         .expect("Error writing to shell profile file");
 
-    println!("{} Nym uninstalled successfully\nPlease restart you shell to complete the uninstallation: {}", style("Success:").green().bold(), style("`exec $SHELL`").bold());
+    success!(format!("Nym uninstalled successfully\nPlease restart your shell to complete the uninstallation: {}", style("`exec $SHELL`").bold()));
 }

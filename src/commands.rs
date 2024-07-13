@@ -5,6 +5,7 @@ use crate::file_management::{
     },
     Alias,
 };
+use crate::{error, success};
 
 use console::style;
 use dialoguer::Confirm;
@@ -33,11 +34,7 @@ pub fn add_alias_command(
     let alias_command = if command.contains('=') {
         command.to_string()
     } else {
-        println!(
-            "{}: {}",
-            style("Error").red().bold(),
-            style("Command must be in format alias_name=\"command\"")
-        );
+        error!("Command must be in format alias_name=\"command\"");
         return;
     };
 
@@ -46,8 +43,7 @@ pub fn add_alias_command(
     // Check if alias already exists
     // If it does, return error
     if check_alias_exists(name, json_file) {
-        println!("{}", style("Error: Alias already exists").red());
-        std::process::exit(1);
+        error!("Alias Already exists", true);
     }
 
     let alias = Alias {
@@ -60,10 +56,7 @@ pub fn add_alias_command(
     add_alias(&alias, json_file);
     append_alias_to_alias_file(&alias, alias_file);
 
-    println!(
-        "{}: Alias created successfully",
-        style("Success").green().bold()
-    );
+    success!("Alias created successfully");
     println!(
         "Please run {} to activate changes",
         style("`exec \"$SHELL\"`").bold().italic()
@@ -82,12 +75,7 @@ pub fn remove_alias_command(json_file: &str, alias_file: &str, name: &str) {
     };
 
     if alias.name != name && !confirm_alias(&alias) {
-        eprintln!(
-            "{}{}",
-            style("Error:").red().bold(),
-            style("Please Try again with a different alias").red()
-        );
-        std::process::exit(1);
+        error!("Please Try again with a different alias", true);
     }
 
     if !Confirm::new()
@@ -102,10 +90,7 @@ pub fn remove_alias_command(json_file: &str, alias_file: &str, name: &str) {
     // Remove alias
     remove_alias_by_name(&alias.name, json_file);
     remove_alias_from_alias_file(&alias.name, alias_file);
-    println!(
-        "{}: Alias removed successfully",
-        style("Success").green().bold()
-    );
+    success!("Alias removed successfully");
     println!(
         "Please run {} to activate changes",
         style("`exec \"$SHELL\"`").bold().italic()
@@ -120,12 +105,7 @@ pub fn toggle_alias_command(json_file: &str, alias_file: &str, name: &str) {
     };
 
     if alias.name != name && !confirm_alias(&alias) {
-        eprintln!(
-            "{}{}",
-            style("Error:").red().bold(),
-            style("Please Try again with a different alias").red()
-        );
-        std::process::exit(1);
+        error!("Please try again with a different alias", true);
     }
 
     toggle_alias_by_name(&alias.name, json_file);
@@ -160,12 +140,7 @@ pub fn rename_alias(json_file: &str, alias_file: &str, old_name: &str, new_name:
     };
 
     if alias.name != old_name && !confirm_alias(&alias) {
-        eprintln!(
-            "{}{}",
-            style("Error:").red().bold(),
-            style("Please Try again with a different alias").red()
-        );
-        std::process::exit(1);
+        error!("Please try again with a different alias", true);
     }
 
     remove_alias_by_name(&alias.name, json_file);
@@ -174,12 +149,11 @@ pub fn rename_alias(json_file: &str, alias_file: &str, old_name: &str, new_name:
     append_alias_to_alias_file(&alias, alias_file);
     add_alias(&alias, json_file);
 
-    println!(
-        "{} Alias {} has been renamed to {}",
-        style("Success:").green().bold(),
-        style(old_name).italic().bold(),
+    success!(format!(
+        "Alias {} has been renamed to {}",
+        style(old_name).bold().italic(),
         style(new_name).italic().bold()
-    );
+    ));
     println!(
         "Please run {} to activate changes",
         style("`exec \"$SHELL\"`").bold().italic()

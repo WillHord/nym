@@ -12,6 +12,8 @@ mod sync;
 use clap::{Arg, ArgAction, Command};
 use console::style;
 
+use fancy_regex::Regex;
+
 fn main() {
     let matches = Command::new("nym")
         .version("0.1.0")
@@ -108,7 +110,7 @@ fn main() {
     // Get json and alias files - if they don't exist throw error (unless subcommand install is called)
     let home_dir = dirs::home_dir().unwrap();
     let json_file_path: String = home_dir
-        .join(".aliases.json")
+        .join(".nym.json")
         .into_os_string()
         .into_string()
         .unwrap();
@@ -120,7 +122,7 @@ fn main() {
     {
         helpers::messages::error!(
             format!(
-                "Alias file not found. Please run {} to create the alias file",
+                "Nym config file not found. Please run {} to create the alias file",
                 style("`nym install <shell_profile>`").bold()
             ),
             true
@@ -171,10 +173,32 @@ fn main() {
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
         }
         Some(("test", _)) => {
-            helpers::messages::error!("This is a test");
-            helpers::messages::error!(style("This is another test").bold().blue());
-            helpers::messages::success!("This is a success");
-            helpers::messages::warning!("This is a warning");
+            let pattern = r#"(?:alias\s+)?(\w+)=([\'"])((?:\\.|(?!\2).)*)\2"#;
+            // let pattern = r#"(?:alias\s+)?(\w+)=([\'"])((?:\\\2|\\\\|[^\\\2])*)\2"#;
+            let re = Regex::new(pattern).unwrap();
+
+            let lines = vec![
+                r#"alias alias_name="echo 'test'""#,
+                r#"alias_name="echo 'test'""#,
+                r#"alias alias_name='echo "test"'"#,
+                r#"alias_name='echo "test"'"#,
+                r#"alias alias_name="echo \"nested 'test'\"""#,
+                r#"alias_name='echo \'nested "test"\'""#,
+                r#"alias alias_name="echo \\"test\\"""#, // Valid escaped quotes
+                r#"alias_name="echo \\"test\\"""#,       // Valid escaped quotes
+            ];
+
+            for line in lines {
+                if re.is_match(line).expect("Should work") {
+                    println!("Valid: {}", line);
+                } else {
+                    println!("Invalid: {}", line);
+                }
+            }
+            // helpers::messages::error!("This is a test");
+            // helpers::messages::error!(style("This is another test").bold().blue());
+            // helpers::messages::success!("This is a success");
+            // helpers::messages::warning!("This is a warning");
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);

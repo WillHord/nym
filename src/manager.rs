@@ -61,11 +61,7 @@ fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
     let aliases = crate::file_management::json::get_aliases_from_file(json_file);
 
     if aliases.aliases.is_empty() {
-        println!(
-            "{}: {}",
-            style("Error").red().bold(),
-            style("Could not find any aliases to remove")
-        );
+        error!("Could not find any aliases to remove");
         return;
     }
 
@@ -96,18 +92,14 @@ fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
         crate::file_management::aliases::remove_alias_from_alias_file(&alias, alias_file);
     }
 
-    println!("{} Aliases removed", style("Success:").green().bold());
+    success!("Aliases removed");
 }
 
 fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
     let aliases = crate::file_management::json::get_aliases_from_file(json_file);
 
     if aliases.aliases.is_empty() {
-        println!(
-            "{}: {}",
-            style("Error").red().bold(),
-            style("Could not find any aliases to toggle")
-        );
+        error!("Could not find any aliases to toggle");
         return;
     }
 
@@ -144,22 +136,14 @@ fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
         );
     }
 
-    println!("{} Aliases toggled", style("Success:").green().bold());
-    // println!(
-    //     "Please run {} to apply the changes",
-    //     style("`exec $SHELL`").bold()
-    // );
+    success!("Aliases toggled");
 }
 
 fn rename_alias(json_file: &str, alias_file: &str) {
     let aliases = crate::file_management::json::get_aliases_from_file(json_file);
 
     if aliases.aliases.is_empty() {
-        println!(
-            "{}: {}",
-            style("Error").red().bold(),
-            style("Could not find any aliases to rename")
-        );
+        error!("Could not find any aliases to rename");
         return;
     }
 
@@ -193,11 +177,7 @@ pub fn alias_manager(json_file: &str, alias_file: &str) {
                         if !cmd.is_empty() {
                             cmd
                         } else {
-                            println!(
-                                "{}: {}",
-                                style("Error").red().bold(),
-                                style("Please enter a valid command")
-                            );
+                            error!("Please enter a valid command");
                             continue;
                         }
                     }
