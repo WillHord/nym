@@ -6,6 +6,13 @@ macro_rules! success {
 }
 
 #[macro_export]
+macro_rules! info {
+    ($message: expr) => {
+        println!("{}: {}", style("Info").bold().cyan(), $message)
+    };
+}
+
+#[macro_export]
 macro_rules! error {
     ($message: expr) => {
         eprintln!("{}: {}", style("Error").bold().red(), $message)

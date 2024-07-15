@@ -9,6 +9,7 @@ use crate::{error, success};
 
 use console::style;
 use dialoguer::Confirm;
+use fancy_regex::Regex;
 
 fn confirm_alias(alias: &Alias) -> bool {
     // Ask for confirmation
@@ -19,25 +20,37 @@ fn confirm_alias(alias: &Alias) -> bool {
     confirm
 }
 
+fn validate_alias(alias: &str) -> bool {
+    let pattern = r#"(?:alias\s+)?(\w+)=([\'"])((?:\\.|(?!\2).)*)\2"#;
+    let re = Regex::new(pattern).unwrap();
+
+    match re.is_match(alias) {
+        Ok(value) => value,
+        Err(_) => {
+            error!("Error validating alias");
+            false
+        }
+    }
+}
+
 pub fn add_alias_command(
     json_file: &str,
     alias_file: &str,
     command: &str,
     description: Option<&String>,
 ) {
-    // TODO: make better alias validation
-    // TODO: Allow for "alias alias_name="command"" and strip the initial alias
-
     // Check if command is in fotmat alias_name="command"
     // If not, add quotes around command
 
-    let alias_command = if command.contains('=') {
+    let alias_command = if validate_alias(command) {
         command.to_string()
     } else {
         error!("Command must be in format alias_name=\"command\"");
         return;
     };
 
+    // If alias starts with alias remove starting alias substring
+    let alias_command = alias_command.trim_start_matches("alias ");
     let name: &str = alias_command.split('=').collect::<Vec<&str>>()[0];
 
     // Check if alias already exists
@@ -158,4 +171,41 @@ pub fn rename_alias(json_file: &str, alias_file: &str, old_name: &str, new_name:
         "Please run {} to activate changes",
         style("`exec \"$SHELL\"`").bold().italic()
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_alias() {
+        let valid_alias_strings = vec![
+            r#"alias alias_name="echo 'test'""#,
+            r#"alias_name="echo 'test'""#,
+            r#"alias alias_name='echo "test"'"#,
+            r#"alias_name='echo "test"'"#,
+            r#"alias alias_name="echo \"nested 'test'\"""#,
+            r#"alias_name='echo \'nested "test"\'""#,
+            r#"alias alias_name="echo \\"test\\"""#,
+            r#"alias_name="echo \\"test\\"""#,
+        ];
+
+        let invalid_alias_strings = vec![
+            r#"alias alias_name = "echo 'test'"#,
+            r#"alias alias_name= "echo 'test'"#,
+            r#"alias_name= "echo 'test'"#,
+            r#"alias alias_name="#,
+            r#"alias alias name="echo 'test'"#,
+            r#"alias echo 'test'"#,
+            r#"alias test="echo 'test'"#,
+        ];
+
+        for alias in valid_alias_strings {
+            assert!(validate_alias(alias));
+        }
+
+        for alias in invalid_alias_strings {
+            assert!(!validate_alias(alias));
+        }
+    }
 }

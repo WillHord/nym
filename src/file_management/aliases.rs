@@ -48,7 +48,6 @@ pub fn append_alias_to_alias_file(alias: &Alias, file: &str) {
     write_aliases_to_alias_file(aliases, file);
 }
 
-// TODO: Return bool to check if alias was removed or not
 pub fn remove_alias_from_alias_file(name: &str, file: &str) {
     let mut aliases = get_aliases_from_alias_file(file);
     aliases.retain(|alias| alias.name != name);

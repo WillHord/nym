@@ -12,8 +12,6 @@ mod sync;
 use clap::{Arg, ArgAction, Command};
 use console::style;
 
-use fancy_regex::Regex;
-
 fn main() {
     let matches = Command::new("nym")
         .version("0.1.0")
@@ -38,6 +36,9 @@ fn main() {
                 )
                 .arg(
                     Arg::new("description")
+                        .short('d')
+                        .long("description")
+                        .value_name("DESCRIPTION")
                         .help("A description of the aliase")
                         .required(false),
                 ),
@@ -104,7 +105,6 @@ fn main() {
                         .help("The name of the alias to view description of"),
                 ),
         )
-        .subcommand(Command::new("test"))
         .get_matches();
 
     // Get json and alias files - if they don't exist throw error (unless subcommand install is called)
@@ -171,34 +171,6 @@ fn main() {
             let old_name = sub_m.get_one::<String>("old_name").unwrap();
             let new_name = sub_m.get_one::<String>("new_name").unwrap();
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
-        }
-        Some(("test", _)) => {
-            let pattern = r#"(?:alias\s+)?(\w+)=([\'"])((?:\\.|(?!\2).)*)\2"#;
-            // let pattern = r#"(?:alias\s+)?(\w+)=([\'"])((?:\\\2|\\\\|[^\\\2])*)\2"#;
-            let re = Regex::new(pattern).unwrap();
-
-            let lines = vec![
-                r#"alias alias_name="echo 'test'""#,
-                r#"alias_name="echo 'test'""#,
-                r#"alias alias_name='echo "test"'"#,
-                r#"alias_name='echo "test"'"#,
-                r#"alias alias_name="echo \"nested 'test'\"""#,
-                r#"alias_name='echo \'nested "test"\'""#,
-                r#"alias alias_name="echo \\"test\\"""#, // Valid escaped quotes
-                r#"alias_name="echo \\"test\\"""#,       // Valid escaped quotes
-            ];
-
-            for line in lines {
-                if re.is_match(line).expect("Should work") {
-                    println!("Valid: {}", line);
-                } else {
-                    println!("Invalid: {}", line);
-                }
-            }
-            // helpers::messages::error!("This is a test");
-            // helpers::messages::error!(style("This is another test").bold().blue());
-            // helpers::messages::success!("This is a success");
-            // helpers::messages::warning!("This is a warning");
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);
