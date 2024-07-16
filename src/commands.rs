@@ -5,19 +5,15 @@ use crate::file_management::{
     },
     Alias,
 };
-use crate::{error, success};
+use crate::{error, helpers, success};
 
 use console::style;
-use dialoguer::Confirm;
 use fancy_regex::Regex;
+use inquire::Confirm;
 
 fn confirm_alias(alias: &Alias) -> bool {
     // Ask for confirmation
-    let confirm = Confirm::new()
-        .with_prompt(format!("Did you mean {}?", alias.name))
-        .interact()
-        .unwrap();
-    confirm
+    helpers::questions::yesno!(format!("Did you mean {}?", alias.name)).unwrap()
 }
 
 fn validate_alias(alias: &str) -> bool {
@@ -91,9 +87,7 @@ pub fn remove_alias_command(json_file: &str, alias_file: &str, name: &str) {
         error!("Please Try again with a different alias", true);
     }
 
-    if !Confirm::new()
-        .with_prompt(format!("Are you sure you want to delete {}?", alias.name))
-        .interact()
+    if !helpers::questions::yesno!(format!("Are you sure you want to delete {}?", alias.name))
         .unwrap()
     {
         eprintln!("{}", style("Exiting").italic());

@@ -4,9 +4,11 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use console::style;
+use inquire::Confirm;
 
 use crate::error;
 use crate::exit;
+use crate::helpers;
 use crate::success;
 use crate::warning;
 
@@ -62,9 +64,7 @@ pub fn install(json_file: &str, shell_profile: &str) {
 
     // If .alias file already exists, ask user if they want to overwirte it
     if alias_file.exists()
-        && !dialoguer::Confirm::new()
-            .with_prompt("Alias file already exists. Do you want to overwrite it? [y/n]")
-            .interact()
+        && !helpers::questions::yesno!("Alias file already exists. Do you want to overwrite it?")
             .unwrap()
     {
         eprintln!("{}", style("Exiting").italic());
@@ -136,14 +136,11 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
     }
 
     // Ask for confirmation
-    let confirm = dialoguer::Confirm::new()
-        .with_prompt(
-            "Are you sure you want to uninstall Nym and delete all aliases created with Nym?",
-        )
-        .interact()
-        .unwrap();
-
-    if !confirm {
+    if !helpers::questions::yesno!(
+        "Are you sure you want to uninstall Nym and delete all aliases created with Nym?"
+    )
+    .unwrap()
+    {
         exit!(1);
     }
 

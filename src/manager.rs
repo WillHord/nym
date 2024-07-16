@@ -1,5 +1,9 @@
-use crate::helpers::messages::{error, success};
+use crate::helpers::{
+    self,
+    messages::{error, success},
+};
 use console::style;
+use inquire::Confirm;
 
 #[derive(Clone)]
 enum ManagerOption {
@@ -52,8 +56,6 @@ fn get_manager_option() -> ManagerOption {
         .find(|option| option.to_string() == selected_option)
         .unwrap();
 
-    // let confirm = inquire::Confirm::new("Are you sure?").prompt().unwrap();
-
     selected_option.clone()
 }
 
@@ -80,10 +82,7 @@ fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
         return;
     }
 
-    if !inquire::Confirm::new("Are you sure you want to delete these aliases?")
-        .prompt()
-        .unwrap()
-    {
+    if !helpers::questions::yesno!("Are you sure you want to delete these aliases?").unwrap() {
         println!("{}", style("Aborting").yellow());
     }
 

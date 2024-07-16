@@ -1,10 +1,10 @@
 use console::style;
-use dialoguer::Confirm;
+use inquire::Confirm;
 
 use crate::file_management::aliases::{append_alias_to_alias_file, get_aliases_from_alias_file};
 use crate::file_management::json::{add_alias, get_aliases_from_file, set_alias_by_name};
 use crate::file_management::{Alias, NymData};
-use crate::success;
+use crate::{helpers, success};
 
 pub fn sync_aliases(json_file: &str, alias_file: &str, force: bool) {
     // Check for inconsistencies between alias file and json file
@@ -24,12 +24,7 @@ pub fn sync_aliases(json_file: &str, alias_file: &str, force: bool) {
     }
     for alias in aliases_not_in_json {
         // Ask if user wants to add alias to json file
-        if force
-            || Confirm::new()
-                .with_prompt(format!("Add {} to json file?", alias.name))
-                .default(false)
-                .interact()
-                .unwrap()
+        if force || helpers::questions::yesno!(format!("Add {} to json file?", alias.name)).unwrap()
         {
             // append_alias_to_alias_file(&alias, json_file);
             add_alias(&alias, json_file);
@@ -50,12 +45,7 @@ pub fn sync_aliases(json_file: &str, alias_file: &str, force: bool) {
 
     for alias in json.aliases {
         if alias.enabled && !aliases.iter().any(|a| a.name == alias.name) {
-            if Confirm::new()
-                .with_prompt(format!("Add {} to alias file?", alias.name))
-                .default(false)
-                .interact()
-                .unwrap()
-            {
+            if helpers::questions::yesno!(format!("Add {} to alias file?", alias.name)).unwrap() {
                 append_alias_to_alias_file(&alias, alias_file);
             } else {
                 // Disable alias in json file
