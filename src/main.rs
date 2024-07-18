@@ -1,5 +1,4 @@
-extern crate clap;
-
+mod database;
 mod file_management;
 mod helpers;
 
@@ -11,6 +10,7 @@ mod sync;
 
 use clap::{Arg, ArgAction, Command};
 use console::style;
+use database::NewAlias;
 
 fn main() {
     let matches = Command::new("nym")
@@ -105,6 +105,7 @@ fn main() {
                         .help("The name of the alias to view description of"),
                 ),
         )
+        .subcommand(Command::new("test"))
         .get_matches();
 
     // Get json and alias files - if they don't exist throw error (unless subcommand install is called)
@@ -171,6 +172,21 @@ fn main() {
             let old_name = sub_m.get_one::<String>("old_name").unwrap();
             let new_name = sub_m.get_one::<String>("new_name").unwrap();
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
+        }
+        Some(("test", _)) => {
+            let conn = crate::database::setupdb("test.db").unwrap();
+            crate::database::groups::create_group(&conn, "group1");
+            crate::database::aliases::add_alias(
+                &conn,
+                &&NewAlias {
+                    name: "test".to_string(),
+                    command: "echo \"test\"".to_string(),
+                    description: "".to_string(),
+                    enabled: true,
+                    group_id: 1,
+                },
+            );
+            crate::database::groups::get_groups(&conn);
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);
