@@ -1,9 +1,5 @@
-use rusqlite::{params, Connection, Result};
-
-use crate::error;
-use console::style;
-
 use super::{Group, NewAlias};
+use rusqlite::{params, Connection};
 
 pub fn create_group(conn: &Connection, name: &str) {
     let _ = match conn.execute("INSERT INTO groups (name) VALUES (?1)", params![name]) {
@@ -78,7 +74,67 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
     }
     groups
 }
-fn get_group_by_name() {}
+
+pub fn get_group_by_name(conn: &Connection, name: &str) -> Result<Group, &'static str> {
+    // Get group if exists
+    let mut group_query = conn
+        .prepare("SELECT * from groups WHERE name = (?1)")
+        .unwrap();
+    let mut rows = group_query.query([name]).unwrap();
+
+    if let Some(row) = rows.next().unwrap() {
+        let mut alias_query = conn
+            .prepare("SELECT * from aliases WHERE group_id = (?1)")
+            .unwrap();
+        let group_id: i32 = row.get("id").unwrap();
+        let mut aliases = alias_query.query([group_id]).unwrap();
+        let mut alias_vec = Vec::new();
+        while let Some(alias) = aliases.next().unwrap() {
+            alias_vec.push(NewAlias {
+                name: alias.get("name").unwrap(),
+                command: alias.get("command").unwrap(),
+                description: alias.get("description").unwrap_or("".to_string()),
+                enabled: alias.get("enabled").unwrap(),
+                group_id,
+            })
+        }
+        Ok(Group {
+            id: group_id,
+            name: row.get("name").unwrap(),
+            aliases: alias_vec,
+        })
+    } else {
+        Err("Could not file group")
+    }
+}
+
+pub fn remove_group(conn: &Connection, name: &str) -> Result<(), &'static str> {
+    // Remove group
+    // If group exists move aliases to uncategorized
+    // Do not allow deleting uncategorized (id 1)
+    if name == "uncategorized" {
+        return Err("Cannot delete uncategorized group");
+    }
+    let group = match get_group_by_name(conn, name) {
+        Ok(val) => val,
+        Err(_) => {
+            return Err("Could not find group to remove");
+        }
+    };
+
+    let _ = match conn.execute(
+        "UPDATE aliases SET group_id = 1 WHERE group_id == (?1)",
+        params![group.id],
+    ) {
+        Ok(val) => val,
+        Err(_) => return Err("Error moving aliases to uncategorized"),
+    };
+
+    match conn.execute("DELETE FROM groups WHERE id == (?1)", params![group.id]) {
+        Ok(_) => Ok(()),
+        Err(_) => Err("Error deleting group"),
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -102,24 +158,58 @@ mod tests {
         }];
         assert_eq!(curr_groups, base_groups);
         create_group(&conn, "group1");
-        let curr_groups = get_groups(&conn);
+        let mut curr_groups = get_groups(&conn);
         let mut add_groups: Vec<Group> = base_groups.clone();
         add_groups.push(Group {
             id: 2,
             name: "group1".to_string(),
             aliases: Vec::new(),
         });
+        curr_groups.sort_by(|a, b| a.id.cmp(&b.id));
         assert_eq!(curr_groups, add_groups);
 
-        add_alias(
+        let uncategorized = get_group_by_name(&conn, "uncategorized").unwrap();
+        assert_eq!(*base_groups.first().unwrap(), uncategorized);
+
+        let _ = add_alias(
             &conn,
             &NewAlias {
                 name: "test".to_string(),
                 command: "echo \"test\"".to_string(),
                 description: "".to_string(),
                 enabled: true,
-                group_id: 1,
+                group_id: 2,
             },
+        );
+
+        let group_with_alias = get_group_by_name(&conn, "group1").unwrap();
+        let group_with_alias_truth = Group {
+            id: 2,
+            name: "group1".to_string(),
+            aliases: vec![NewAlias {
+                name: "test".to_string(),
+                command: "echo \"test\"".to_string(),
+                description: "".to_string(),
+                enabled: true,
+                group_id: 2,
+            }],
+        };
+        assert_eq!(group_with_alias, group_with_alias_truth);
+
+        remove_group(&conn, "group1").unwrap();
+        assert_eq!(
+            get_group_by_name(&conn, "uncategorized").unwrap(),
+            Group {
+                id: 1,
+                name: "uncategorized".to_string(),
+                aliases: vec![NewAlias {
+                    name: "test".to_string(),
+                    command: "echo \"test\"".to_string(),
+                    description: "".to_string(),
+                    enabled: true,
+                    group_id: 1,
+                }]
+            }
         );
 
         std::fs::remove_file("./test.db").expect("Error removing test database");
