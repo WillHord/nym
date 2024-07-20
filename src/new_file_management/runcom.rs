@@ -1,4 +1,4 @@
-use crate::database::{Group, NewAlias};
+use crate::new_file_management::{Group, NewAlias};
 use fancy_regex::Regex;
 
 fn capture_aliases(from_str: &str) -> Vec<String> {
@@ -67,11 +67,8 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
 
 #[cfg(test)]
 mod tests {
+    use super::super::{Group, NewAlias};
     use super::*;
-    use crate::{
-        database::{Group, NewAlias},
-        runcom::manage::capture_aliases,
-    };
 
     #[test]
     fn capture_aliases_test() {
@@ -140,6 +137,8 @@ mod tests {
         assert_eq!(Ok(()), write_to_runcom("test1rc", vec![group1, group2]));
 
         let enabled_aliases = read_aliases("test1rc").unwrap();
-        assert_eq!(enabled_aliases, vec![alias1, alias2, alias3])
+        assert_eq!(enabled_aliases, vec![alias1, alias2, alias3]);
+
+        std::fs::remove_file("test1rc").expect("Error deleting test files");
     }
 }

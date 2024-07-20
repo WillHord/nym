@@ -1,4 +1,4 @@
-use super::{Group, NewAlias};
+use super::super::{Group, NewAlias};
 use rusqlite::{params, Connection};
 
 pub fn create_group(conn: &Connection, name: &str) {

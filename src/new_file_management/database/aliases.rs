@@ -1,7 +1,7 @@
 use clap::error::Result;
 use rusqlite::{params, Connection};
 
-use super::NewAlias;
+use super::super::NewAlias;
 
 pub fn add_alias(conn: &Connection, alias: &NewAlias) -> Result<(), &'static str> {
     let _ = match conn.execute(
@@ -72,7 +72,8 @@ fn remove_alias(conn: &Connection, name: &str) -> Result<(), &'static str> {
 
 #[cfg(test)]
 mod tests {
-    use super::super::{setupdb, NewAlias};
+    use super::super::super::NewAlias;
+    use super::super::setupdb;
     use super::*;
 
     #[test]

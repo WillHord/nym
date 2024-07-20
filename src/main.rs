@@ -1,7 +1,6 @@
-mod database;
 mod file_management;
 mod helpers;
-mod runcom;
+mod new_file_management;
 
 mod commands;
 mod install;
@@ -11,7 +10,6 @@ mod sync;
 
 use clap::{Arg, ArgAction, Command};
 use console::style;
-use database::NewAlias;
 
 fn main() {
     let matches = Command::new("nym")
@@ -175,19 +173,19 @@ fn main() {
             crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
         }
         Some(("test", _)) => {
-            let conn = crate::database::setupdb("test.db").unwrap();
-            crate::database::groups::create_group(&conn, "group1");
-            crate::database::aliases::add_alias(
-                &conn,
-                &&NewAlias {
-                    name: "test".to_string(),
-                    command: "echo \"test\"".to_string(),
-                    description: "".to_string(),
-                    enabled: true,
-                    group_id: 1,
-                },
-            );
-            crate::database::groups::get_groups(&conn);
+            // let conn = crate::database::setupdb("test.db").unwrap();
+            // crate::database::groups::create_group(&conn, "group1");
+            // crate::database::aliases::add_alias(
+            //     &conn,
+            //     &&NewAlias {
+            //         name: "test".to_string(),
+            //         command: "echo \"test\"".to_string(),
+            //         description: "".to_string(),
+            //         enabled: true,
+            //         group_id: 1,
+            //     },
+            // );
+            // crate::database::groups::get_groups(&conn);
         }
         _ => {
             crate::manager::alias_manager(json_file, alias_file);
