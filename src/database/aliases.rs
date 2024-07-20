@@ -58,15 +58,17 @@ fn get_alias_by_name(conn: &Connection, name: &str) -> Result<NewAlias, &'static
         Err("Error could not find alias")
     }
 }
+
 fn remove_alias(conn: &Connection, name: &str) -> Result<(), &'static str> {
     match conn.execute("DELETE FROM aliases WHERE name == (?1)", params![name]) {
         Ok(_) => Ok(()),
         Err(_) => Err("Error deleting alias"),
     }
 }
-fn update_alias(conn: &Connection, name: &str, updatedAlias: NewAlias) -> Result<(), &'static str> {
-    todo!()
-}
+
+// fn update_alias(conn: &Connection, name: &str, updatedAlias: NewAlias) -> Result<(), &'static str> {
+//     todo!()
+// }
 
 #[cfg(test)]
 mod tests {

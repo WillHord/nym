@@ -1,6 +1,7 @@
 mod database;
 mod file_management;
 mod helpers;
+mod runcom;
 
 mod commands;
 mod install;
