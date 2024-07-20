@@ -1,8 +1,0 @@
-###############Aliases###############
-
-##########uncategorized##########
-alias test_alias_1="echo \"test alias 1\""
-alias test_alias_2="echo \"test alias 2\""
-
-##########group1##########
-alias test_alias_3="echo \"test alias 3\""
