@@ -1,11 +1,13 @@
+mod commands;
+
 mod file_management;
 mod helpers;
 mod new_file_management;
 
-mod commands;
 mod install;
 mod list;
 mod manager;
+mod old_commands;
 mod sync;
 
 use clap::{Arg, ArgAction, Command};
@@ -141,15 +143,15 @@ fn main() {
         Some(("add", sub_m)) => {
             let command = sub_m.get_one::<String>("command").unwrap();
             let description = sub_m.get_one::<String>("description");
-            crate::commands::add_alias_command(json_file, alias_file, command, description);
+            crate::old_commands::add_alias_command(json_file, alias_file, command, description);
         }
         Some(("rm", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::commands::remove_alias_command(json_file, alias_file, name);
+            crate::old_commands::remove_alias_command(json_file, alias_file, name);
         }
         Some(("toggle", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            crate::commands::toggle_alias_command(json_file, alias_file, name);
+            crate::old_commands::toggle_alias_command(json_file, alias_file, name);
         }
         Some(("sync", sub_m)) => {
             let force: bool = *sub_m.get_one::<bool>("force").unwrap_or(&false);
@@ -170,7 +172,7 @@ fn main() {
         Some(("rename", sub_m)) => {
             let old_name = sub_m.get_one::<String>("old_name").unwrap();
             let new_name = sub_m.get_one::<String>("new_name").unwrap();
-            crate::commands::rename_alias(json_file, alias_file, old_name, new_name);
+            crate::old_commands::rename_alias(json_file, alias_file, old_name, new_name);
         }
         Some(("test", _)) => {
             // let conn = crate::database::setupdb("test.db").unwrap();

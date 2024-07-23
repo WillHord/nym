@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use clap::error::Result;
 use rusqlite::{params, Connection};
 
-use super::super::NewAlias;
+use super::super::{Group, NewAlias};
 
 pub fn add_alias(conn: &Connection, alias: &NewAlias) -> Result<(), &'static str> {
     let _ = match conn.execute(
@@ -17,7 +19,7 @@ pub fn add_alias(conn: &Connection, alias: &NewAlias) -> Result<(), &'static str
     Ok(())
 }
 
-fn get_all_aliases(conn: &Connection) -> Vec<NewAlias> {
+pub fn get_all_aliases(conn: &Connection) -> Vec<NewAlias> {
     let mut alias_query = conn.prepare("SELECT * FROM aliases;").unwrap();
 
     let mut rows = alias_query.query([]).unwrap();
@@ -41,7 +43,23 @@ fn get_all_aliases(conn: &Connection) -> Vec<NewAlias> {
     aliases
 }
 
-fn get_alias_by_name(conn: &Connection, name: &str) -> Result<NewAlias, &'static str> {
+pub fn get_groups_and_aliases(conn: &Connection) -> Vec<Group> {
+    let aliases = get_all_aliases(conn);
+    let mut groups = match get_group_nameids(conn) {
+        Ok(group_ids) => group_ids,
+        Err(_) => return Vec::new(),
+    };
+    println!("Alias len {}", aliases.len());
+
+    for alias in aliases {
+        if let Some(group) = groups.iter_mut().find(|g| g.id == alias.group_id) {
+            group.aliases.push(alias);
+        }
+    }
+    groups
+}
+
+pub fn get_alias_by_name(conn: &Connection, name: &str) -> Result<NewAlias, &'static str> {
     let mut alias_query = conn
         .prepare("SELECT * FROM aliases WHERE name == (?1);")
         .unwrap();
@@ -59,19 +77,64 @@ fn get_alias_by_name(conn: &Connection, name: &str) -> Result<NewAlias, &'static
     }
 }
 
-fn remove_alias(conn: &Connection, name: &str) -> Result<(), &'static str> {
+pub fn remove_alias(conn: &Connection, name: &str) -> Result<(), &'static str> {
     match conn.execute("DELETE FROM aliases WHERE name == (?1)", params![name]) {
         Ok(_) => Ok(()),
         Err(_) => Err("Error deleting alias"),
     }
 }
 
-// fn update_alias(conn: &Connection, name: &str, updatedAlias: NewAlias) -> Result<(), &'static str> {
-//     todo!()
-// }
+pub fn get_group_nameids(conn: &Connection) -> Result<Vec<Group>, &'static str> {
+    let mut group_query = conn.prepare("SELECT * FROM groups;").unwrap();
+    let mut rows = group_query.query([]).unwrap();
+
+    let mut groups = Vec::new();
+
+    while let Some(row) = rows.next().unwrap() {
+        let group_id: i32 = row.get("id").unwrap();
+        let name: String = row.get("name").unwrap();
+
+        groups.push(Group {
+            id: group_id,
+            name,
+            aliases: Vec::new(),
+        });
+    }
+
+    Ok(groups)
+}
+
+pub fn update_alias(
+    conn: &Connection,
+    old_alias_name: &str,
+    updated_alias: NewAlias,
+) -> Result<(), &'static str> {
+    match conn.execute(
+        "UPDATE aliases SET 
+            name = (?1),
+            command = (?2),
+            description = (?3),
+            enabled = (?4),
+            group_id = (?5)
+        WHERE name = (?6);",
+        [
+            updated_alias.name,
+            updated_alias.command,
+            updated_alias.description,
+            (updated_alias.enabled as i32).to_string(),
+            updated_alias.group_id.to_string(),
+            old_alias_name.to_string(),
+        ],
+    ) {
+        Ok(_) => Ok(()),
+        Err(_) => Err("Error updating alias"),
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use crate::new_file_management::database::groups::{self, get_groups};
+
     use super::super::super::NewAlias;
     use super::super::setupdb;
     use super::*;
@@ -99,10 +162,31 @@ mod tests {
             group_id: 1,
         };
 
+        let group_names = get_group_nameids(&conn).unwrap();
+        assert_eq!(
+            group_names,
+            vec![Group {
+                id: 1,
+                name: "uncategorized".to_string(),
+                aliases: Vec::new(),
+            }]
+        );
+
         let _ = add_alias(&conn, &alias1);
 
         let alias1_get = get_alias_by_name(&conn, "alias1").unwrap();
         assert_eq!(alias1, alias1_get);
+
+        let groups = get_groups(&conn);
+        assert_eq!(
+            groups,
+            vec![Group {
+                id: 1,
+                name: "uncategorized".to_string(),
+                aliases: vec![alias1.clone()],
+            }]
+        );
+
         let _ = add_alias(&conn, &alias2);
         let alias2_get = get_alias_by_name(&conn, "alias2").unwrap();
         assert_eq!(alias2, alias2_get);
@@ -113,6 +197,18 @@ mod tests {
         let _ = remove_alias(&conn, "alias1");
         let alias_vec = get_all_aliases(&conn);
         assert_eq!(vec![alias2], alias_vec);
+
+        let updated_alias = NewAlias {
+            name: "alias2".to_string(),
+            command: "echo 'updated_alias'".to_string(),
+            description: "description".to_string(),
+            enabled: true,
+            group_id: 1,
+        };
+        let _ = update_alias(&conn, "alias2", updated_alias.clone());
+
+        let alias_vec = get_all_aliases(&conn);
+        assert_eq!(vec![updated_alias], alias_vec);
 
         std::fs::remove_file(test_db).expect("Error removing test database");
     }

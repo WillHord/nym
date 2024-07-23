@@ -128,7 +128,7 @@ fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
 
     for alias in selected_aliases {
         // Remove the (enabled) or (disabled) from the alias name to get the actual alias name
-        crate::commands::toggle_alias_command(
+        crate::old_commands::toggle_alias_command(
             json_file,
             alias_file,
             alias.split(' ').next().unwrap(),
@@ -158,7 +158,7 @@ fn rename_alias(json_file: &str, alias_file: &str) {
 
     let new_name = inquire::Text::new("Enter the new name").prompt().unwrap();
 
-    crate::commands::rename_alias(json_file, alias_file, &selected_alias, &new_name);
+    crate::old_commands::rename_alias(json_file, alias_file, &selected_alias, &new_name);
 }
 
 pub fn alias_manager(json_file: &str, alias_file: &str) {
@@ -187,7 +187,7 @@ pub fn alias_manager(json_file: &str, alias_file: &str) {
                 let description = inquire::Text::new("Enter the description")
                     .prompt()
                     .unwrap();
-                crate::commands::add_alias_command(
+                crate::old_commands::add_alias_command(
                     json_file,
                     alias_file,
                     &command,
