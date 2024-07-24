@@ -40,9 +40,6 @@ pub fn update_runcom(runcom_file: &str, db_file: &str) {
     };
 
     let groups = get_groups_and_aliases(&conn);
-    for g in groups.clone() {
-        println!("!group len {}", g.aliases.len());
-    }
     match write_to_runcom(runcom_file, groups) {
         Ok(_) => (),
         Err(_) => {

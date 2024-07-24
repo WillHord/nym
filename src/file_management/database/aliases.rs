@@ -1,7 +1,7 @@
 use clap::error::Result;
 use rusqlite::{params, Connection};
 
-use super::super::{Group, Alias};
+use super::super::{Alias, Group};
 
 pub fn add_alias(conn: &Connection, alias: &Alias) -> Result<(), &'static str> {
     let _ = match conn.execute(
@@ -47,7 +47,6 @@ pub fn get_groups_and_aliases(conn: &Connection) -> Vec<Group> {
         Ok(group_ids) => group_ids,
         Err(_) => return Vec::new(),
     };
-    println!("Alias len {}", aliases.len());
 
     for alias in aliases {
         if let Some(group) = groups.iter_mut().find(|g| g.id == alias.group_id) {

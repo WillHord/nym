@@ -5,8 +5,8 @@ use crate::{
     },
     error,
     file_management::{
-        database::{aliases::update_alias, setupdb},
-        update_runcom,
+        database::{aliases::update_alias, db_conn},
+        update_runcom, Alias,
     },
     success,
 };
@@ -15,31 +15,27 @@ use inquire::Confirm;
 
 // TODO: abstract out connection and fuzzy get alias to private function
 
-pub fn rename(runcom_file: &str, db_file: &str, old_name: &str, new_name: &str) {
-    let conn = match setupdb(db_file) {
-        Ok(conn) => conn,
-        Err(_) => {
-            error!("issue connecting to database");
-            return;
-        }
-    };
-
-    let mut alias = match fuzzy_get_alias(old_name, db_file) {
+fn get_alias(db_file: &str, alias_name: &str) -> Result<Alias, &'static str> {
+    let alias = match fuzzy_get_alias(alias_name, db_file) {
         Some(alias) => alias,
-        None => {
-            error!("Alias not found");
-            return;
-        }
+        None => return Err("Could not file alias"),
     };
 
-    if alias.name != old_name && !confirm_alias(&alias) {
-        error!("Please try again with a different alias", true);
+    if alias.name != alias_name && !confirm_alias(&alias) {
+        return Err("Please try again with a different alias");
     }
+    Ok(alias)
+}
 
-    let old_name = alias.name;
-    alias.name = new_name.to_string();
-
-    let _ = match update_alias(&conn, &old_name, alias.clone()) {
+fn edit_alias(
+    runcom_file: &str,
+    db_file: &str,
+    old_alias: &str,
+    new_alias: &Alias,
+    success_msg: String,
+) {
+    let conn = &db_conn(db_file);
+    let _ = match update_alias(conn, old_alias, new_alias.clone()) {
         Ok(_) => true,
         Err(_) => {
             error!("Could not rename alias");
@@ -48,77 +44,70 @@ pub fn rename(runcom_file: &str, db_file: &str, old_name: &str, new_name: &str) 
     };
 
     update_runcom(runcom_file, db_file);
-    success!(format!(
-        "Alias {} has been renamed to {}",
-        style(old_name).bold().italic(),
-        style(new_name).italic().bold()
-    ));
+    success!(success_msg);
     println!(
         "Please run {} to activate changes",
         style("`exec \"$SHELL\"`").bold().italic()
+    );
+}
+
+pub fn rename(runcom_file: &str, db_file: &str, old_name: &str, new_name: &str) {
+    let mut alias = match get_alias(db_file, old_name) {
+        Ok(alias) => alias,
+        Err(e) => {
+            error!(format!("{}", e));
+            return;
+        }
+    };
+
+    let old_name = alias.name;
+    alias.name = new_name.to_string();
+
+    edit_alias(
+        runcom_file,
+        db_file,
+        &old_name,
+        &alias,
+        format!(
+            "Alias {} has been renamed to {}",
+            style(old_name.clone()).bold().italic(),
+            style(new_name).italic().bold()
+        ),
     );
 }
 
 pub fn toggle_alias(runcom_file: &str, db_file: &str, alias_name: &str) {
-    let conn = match setupdb(db_file) {
-        Ok(conn) => conn,
-        Err(_) => {
-            error!("issue connecting to database");
+    let mut alias = match get_alias(db_file, alias_name) {
+        Ok(alias) => alias,
+        Err(e) => {
+            error!(format!("{}", e));
             return;
         }
     };
-
-    let mut alias = match fuzzy_get_alias(alias_name, db_file) {
-        Some(alias) => alias,
-        None => {
-            error!("Alias not found");
-            return;
-        }
-    };
-
-    if alias.name != alias_name && !confirm_alias(&alias) {
-        error!("Please try again with a different alias", true);
-    }
-
     alias.enabled = !alias.enabled;
-    let _ = match update_alias(&conn, &alias.name, alias.clone()) {
-        Ok(_) => true,
-        Err(_) => {
-            error!("Could not toggle alias");
-            return;
-        }
-    };
 
-    update_runcom(runcom_file, db_file);
-    // TODO: change this to success
-    println!(
-        "Alias {} is now {}",
-        style(alias.name).italic().bold(),
-        if alias.enabled {
-            style("enabled").bold().green()
-        } else {
-            style("disabled").bold().red()
-        }
-    );
-    println!(
-        "Please run {} to activate changes",
-        style("`exec \"$SHELL\"`").bold().italic()
+    edit_alias(
+        runcom_file,
+        db_file,
+        &alias.name,
+        &alias,
+        format!(
+            "Alias {} is now {}",
+            style(alias.clone().name).italic().bold(),
+            if alias.enabled {
+                style("enabled").bold().green()
+            } else {
+                style("disabled").bold().red()
+            }
+        ),
     );
 }
 
 pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, group_name: &str) {
-    let conn = match setupdb(db_file) {
-        Ok(conn) => conn,
-        Err(_) => {
-            error!("issue connecting to database");
-            return;
-        }
-    };
-
-    let mut alias = match fuzzy_get_alias(alias_name, db_file) {
-        Some(alias) => alias,
-        None => {
-            error!("Alias not found");
+    let mut alias = match get_alias(db_file, alias_name) {
+        Ok(alias) => alias,
+        Err(e) => {
+            error!(format!("{}", e));
             return;
         }
     };
@@ -131,10 +120,6 @@ pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, grou
         }
     };
 
-    if alias.name != alias_name && !confirm_alias(&alias) {
-        error!("Please try again with a different alias", true);
-    }
-
     if group.name != group_name
         && !crate::helpers::questions::yesno!(format!("Did you mean {}?", group.name)).unwrap()
     {
@@ -142,28 +127,21 @@ pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, grou
     }
 
     alias.group_id = group.id;
-    let _ = match update_alias(&conn, &alias.name, alias.clone()) {
-        Ok(_) => true,
-        Err(_) => {
-            error!("Could not move alias group");
-            return;
-        }
-    };
 
-    update_runcom(runcom_file, db_file);
-    // TODO: change this to success
-    println!(
-        "Alias {} is now {}",
-        style(alias.name).italic().bold(),
-        if alias.enabled {
-            style("enabled").bold().green()
-        } else {
-            style("disabled").bold().red()
-        }
-    );
-    println!(
-        "Please run {} to activate changes",
-        style("`exec \"$SHELL\"`").bold().italic()
+    edit_alias(
+        runcom_file,
+        db_file,
+        &alias.name,
+        &alias,
+        format!(
+            "Alias {} is now {}",
+            style(alias.clone().name).italic().bold(),
+            if alias.enabled {
+                style("enabled").bold().green()
+            } else {
+                style("disabled").bold().red()
+            }
+        ),
     );
 }
 
@@ -174,6 +152,7 @@ mod tests {
 
     use crate::file_management::database::aliases::get_all_aliases;
     use crate::file_management::database::groups::create_group;
+    use crate::file_management::database::setupdb;
     use crate::file_management::runcom::read_aliases;
     use crate::file_management::Alias;
 

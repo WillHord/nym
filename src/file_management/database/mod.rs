@@ -5,34 +5,10 @@ use crate::error;
 use console::style;
 use rusqlite::{params, Connection, Result};
 
-// pub struct Script {
-//     pub name: String,
-//     pub location: String,
-//     pub description: String,
-//     pub enabled: bool,
-// }
-
-// #[derive(Debug, Clone, Eq, PartialEq)]
-// pub struct Alias {
-//     pub name: String,
-//     pub command: String,
-//     pub description: String,
-//     pub enabled: bool,
-//     pub group_id: i32,
-// }
-//
-// #[derive(Debug, Clone, Eq, PartialEq)]
-// pub struct Group {
-//     pub id: i32,
-//     pub name: String,
-//     pub aliases: Vec<Alias>,
-// }
-//
 pub fn setupdb(db_path: &str) -> Result<Connection> {
     let conn = match Connection::open(db_path) {
         Ok(conn) => conn,
         Err(err) => {
-            println!("DID NOT WORK");
             error!("Could not connect to database");
             return Err(err);
         }
@@ -45,7 +21,7 @@ pub fn setupdb(db_path: &str) -> Result<Connection> {
         )",
         [],
     ) {
-        Ok(_) => println!("Table created"),
+        Ok(_) => (),
         Err(err) => {
             eprintln!("Could not create groups table");
             eprintln!("Error: {}", err);
@@ -64,7 +40,7 @@ pub fn setupdb(db_path: &str) -> Result<Connection> {
         )",
         [],
     ) {
-        Ok(_) => println!("Table created"),
+        Ok(_) => (),
         Err(err) => eprintln!("Error: {}", err),
     };
 
@@ -73,4 +49,14 @@ pub fn setupdb(db_path: &str) -> Result<Connection> {
         params!["uncategorized"],
     );
     Ok(conn)
+}
+
+pub fn db_conn(db_path: &str) -> Connection {
+    match setupdb(db_path) {
+        Ok(conn) => conn,
+        Err(_) => {
+            error!("issue connecting to database");
+            std::process::exit(1);
+        }
+    }
 }

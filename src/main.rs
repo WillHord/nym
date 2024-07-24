@@ -1,21 +1,15 @@
 mod commands;
-
-// mod file_management;
 mod file_management;
 mod helpers;
-
 mod install;
-// mod list;
 mod manager;
-// TODO: Delete after refactoring manager
-// mod old_commands;
 
 use clap::{Arg, ArgAction, Command};
-// use console::style;
+use console::style;
 
 fn main() {
     let matches = Command::new("nym")
-        .version("0.1.0")
+        .version("0.1.2")
         .author("Will Hord")
         .about("A simple alias manager")
         .subcommand(
@@ -45,11 +39,21 @@ fn main() {
                 ),
         )
         .subcommand(
-            Command::new("rm").about("Remove an alias by name").arg(
-                Arg::new("name")
-                    .help("The name of the alias to remove")
-                    .required(true),
-            ),
+            Command::new("remove")
+                .about("Remove an alias by name")
+                .arg(
+                    Arg::new("name")
+                        .help("The name of the alias to remove")
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("force")
+                        .help("Force remove alias")
+                        .short('f')
+                        .long("force")
+                        .action(ArgAction::SetTrue)
+                        .required(false),
+                ),
         )
         .subcommand(
             Command::new("rename")
@@ -99,9 +103,20 @@ fn main() {
         .get_matches();
 
     // Get config files - if they don't exist throw error (unless subcommand install is called)
-    // TODO: check files are present else throw error (unless subcommand install is called)
     let home_dir = dirs::home_dir().unwrap();
     let nym_dir = home_dir.join(".nym/");
+
+    if !nym_dir.exists()
+        && (matches.subcommand().is_none() || matches.subcommand().unwrap().0 != "install")
+    {
+        eprintln!(
+            "{}: Nym config dir not found. Please run {} to create dir",
+            style("Error").red().bold(),
+            style("`nym install <shell_profile>`").bold()
+        );
+        std::process::exit(1);
+    }
+
     let nym_db = nym_dir
         .join("nym.db")
         .into_os_string()
@@ -113,11 +128,9 @@ fn main() {
         .into_string()
         .unwrap();
 
-    println!("Database: {}\n Runcom: {}", nym_db, nymrc);
-
     match matches.subcommand() {
         Some(("list", flags)) => {
-            println!("Listing  aliases");
+            println!("Listing aliases");
             crate::commands::aliases::list::list_aliases(
                 &nym_db,
                 *flags.get_one("disabled").unwrap_or(&false),
@@ -131,11 +144,11 @@ fn main() {
                 .to_string();
             crate::commands::aliases::add::add_alias(&nymrc, &nym_db, &command, &description, 1);
         }
-        Some(("rm", sub_m)) => {
+        Some(("remove", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
-            // TODO: add force flag
+            let force = sub_m.get_one::<bool>("force").unwrap_or(&false);
             // TODO: allow for "remove" command as well as "rm"
-            crate::commands::aliases::remove::remove_alias(&nymrc, &nym_db, name, false);
+            crate::commands::aliases::remove::remove_alias(&nymrc, &nym_db, name, *force);
         }
         Some(("toggle", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
