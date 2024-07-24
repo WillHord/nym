@@ -7,8 +7,8 @@ mod new_file_management;
 mod install;
 mod list;
 mod manager;
+// TODO: Delete after refactoring manager
 mod old_commands;
-mod sync;
 
 use clap::{Arg, ArgAction, Command};
 use console::style;
@@ -72,17 +72,6 @@ fn main() {
                     .required(true),
             ),
         )
-        // .subcommand(
-        //     Command::new("sync")
-        //         .about("Sync aliases between json file and alias file")
-        //         .arg(
-        //             Arg::new("force")
-        //                 .long("force")
-        //                 .short('f')
-        //                 .help("Force sync")
-        //                 .action(ArgAction::SetTrue),
-        //         ),
-        // )
         .subcommand(
             Command::new("install").about("Install Nym").arg(
                 Arg::new("shell_profile")
