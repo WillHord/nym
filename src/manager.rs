@@ -59,19 +59,23 @@ fn get_manager_option() -> ManagerOption {
     selected_option.clone()
 }
 
-fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
-    let aliases = crate::file_management::json::get_aliases_from_file(json_file);
+fn bulk_remove_aliases(runcom_file: &str, db_file: &str) {
+    let conn = match crate::new_file_management::database::setupdb(db_file) {
+        Ok(conn) => conn,
+        Err(_) => {
+            error!("issue connecting to database");
+            return;
+        }
+    };
 
-    if aliases.aliases.is_empty() {
+    let aliases = crate::new_file_management::database::aliases::get_all_aliases(&conn);
+
+    if aliases.is_empty() {
         error!("Could not find any aliases to remove");
         return;
     }
 
-    let alias_names: Vec<String> = aliases
-        .aliases
-        .iter()
-        .map(|alias| alias.name.clone())
-        .collect();
+    let alias_names: Vec<String> = aliases.iter().map(|alias| alias.name.clone()).collect();
 
     let selected_aliases: Vec<String> =
         inquire::MultiSelect::new("Select aliases to remove", alias_names)
@@ -87,24 +91,30 @@ fn bulk_remove_aliases(json_file: &str, alias_file: &str) {
     }
 
     for alias in selected_aliases {
-        crate::file_management::json::remove_alias_by_name(&alias, json_file);
-        crate::file_management::aliases::remove_alias_from_alias_file(&alias, alias_file);
+        crate::commands::aliases::remove::remove_alias(runcom_file, db_file, &alias, true);
     }
 
     success!("Aliases removed");
 }
 
-fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
-    let aliases = crate::file_management::json::get_aliases_from_file(json_file);
+fn bulk_toggle_aliases(runcom_file: &str, db_file: &str) {
+    let conn = match crate::new_file_management::database::setupdb(db_file) {
+        Ok(conn) => conn,
+        Err(_) => {
+            error!("issue connecting to database");
+            return;
+        }
+    };
 
-    if aliases.aliases.is_empty() {
+    let aliases = crate::new_file_management::database::aliases::get_all_aliases(&conn);
+
+    if aliases.is_empty() {
         error!("Could not find any aliases to toggle");
         return;
     }
 
     // Alias_names should be a vector of strings of the names of the aliases as well as if they are disabled or not
     let alias_names: Vec<String> = aliases
-        .aliases
         .iter()
         .map(|alias| {
             alias.name.clone()
@@ -128,9 +138,9 @@ fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
 
     for alias in selected_aliases {
         // Remove the (enabled) or (disabled) from the alias name to get the actual alias name
-        crate::old_commands::toggle_alias_command(
-            json_file,
-            alias_file,
+        crate::commands::aliases::edit::toggle_alias(
+            runcom_file,
+            db_file,
             alias.split(' ').next().unwrap(),
         );
     }
@@ -138,37 +148,42 @@ fn bulk_toggle_aliases(json_file: &str, alias_file: &str) {
     success!("Aliases toggled");
 }
 
-fn rename_alias(json_file: &str, alias_file: &str) {
-    let aliases = crate::file_management::json::get_aliases_from_file(json_file);
+fn rename_alias(runcom_file: &str, db_file: &str) {
+    let conn = match crate::new_file_management::database::setupdb(db_file) {
+        Ok(conn) => conn,
+        Err(_) => {
+            error!("issue connecting to database");
+            return;
+        }
+    };
 
-    if aliases.aliases.is_empty() {
+    let aliases = crate::new_file_management::database::aliases::get_all_aliases(&conn);
+
+    if aliases.is_empty() {
         error!("Could not find any aliases to rename");
         return;
     }
 
-    let alias_names: Vec<String> = aliases
-        .aliases
-        .iter()
-        .map(|alias| alias.name.clone())
-        .collect();
+    let alias_names: Vec<String> = aliases.iter().map(|alias| alias.name.clone()).collect();
 
     let selected_alias: String = inquire::Select::new("Select alias to rename", alias_names)
         .prompt()
         .unwrap();
 
-    let new_name = inquire::Text::new("Enter the new name").prompt().unwrap();
+    // TODO: Test this and add validation
+    let new_name = inquire::Text::new("Enter the new name:").prompt().unwrap();
 
-    crate::old_commands::rename_alias(json_file, alias_file, &selected_alias, &new_name);
+    crate::commands::aliases::edit::rename(runcom_file, db_file, &selected_alias, &new_name);
 }
 
-pub fn alias_manager(json_file: &str, alias_file: &str) {
+pub fn alias_manager(runcom_file: &str, db_file: &str) {
     println!("Alias manager");
     loop {
         let option: ManagerOption = get_manager_option();
         match option {
             ManagerOption::ListAliases => {
                 println!("Listing aliases");
-                crate::list::list_aliases(json_file, false);
+                crate::commands::aliases::list::list_aliases(db_file, false);
             }
             ManagerOption::AddAlias => {
                 let command = match inquire::Text::new("Enter the command").prompt() {
@@ -176,7 +191,7 @@ pub fn alias_manager(json_file: &str, alias_file: &str) {
                         if !cmd.is_empty() {
                             cmd
                         } else {
-                            error!("Please enter a valid command");
+                            error!("Please enter a valid command:");
                             continue;
                         }
                     }
@@ -184,24 +199,25 @@ pub fn alias_manager(json_file: &str, alias_file: &str) {
                         return;
                     }
                 };
-                let description = inquire::Text::new("Enter the description")
+                let description = inquire::Text::new("Enter the description:")
                     .prompt()
-                    .unwrap();
-                crate::old_commands::add_alias_command(
-                    json_file,
-                    alias_file,
+                    .unwrap_or("".to_string());
+                crate::commands::aliases::add::add_alias(
+                    runcom_file,
+                    db_file,
                     &command,
-                    Some(&description),
+                    &description,
+                    1,
                 );
             }
             ManagerOption::RemoveAlias => {
-                bulk_remove_aliases(json_file, alias_file);
+                bulk_remove_aliases(runcom_file, db_file);
             }
             ManagerOption::RenameAlias => {
-                rename_alias(json_file, alias_file);
+                rename_alias(runcom_file, db_file);
             }
             ManagerOption::ToggleAlias => {
-                bulk_toggle_aliases(json_file, alias_file);
+                bulk_toggle_aliases(runcom_file, db_file);
             }
             _ => {
                 println!("Exiting nym");

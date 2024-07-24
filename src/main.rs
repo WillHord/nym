@@ -160,8 +160,7 @@ fn main() {
             crate::commands::aliases::edit::rename(&nymrc, &nym_db, old_name, new_name);
         }
         _ => {
-            panic!("Manager is temporarily deactivated");
-            // crate::manager::alias_manager(json_file, alias_file);
+            crate::manager::alias_manager(&nymrc, &nym_db);
         }
     }
 }
