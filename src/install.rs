@@ -22,9 +22,6 @@ fn check_installed(shell_profile: &str) -> bool {
     let nymdir = home_dir.join(".nym");
     let nymrc = nymdir.join("nymrc");
 
-    // let home_dir = dirs::home_dir().unwrap();
-    // let alias_file = home_dir.join(".nym_aliases");
-    // let alias_file = alias_file.to_str().unwrap();
     if !nymrc.exists() {
         return false;
     }
