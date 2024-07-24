@@ -39,7 +39,7 @@ fn check_installed(shell_profile: &str) -> bool {
     false
 }
 
-pub fn install(json_file: &str, shell_profile: &str) {
+pub fn install(shell_profile: &str) {
     // OLD/FUTURE: Install program in 3 steps
     // 1. Check the shell and get the shell profile file
     // 1.5 confirm teh shell profile file
@@ -60,10 +60,11 @@ pub fn install(json_file: &str, shell_profile: &str) {
 
     // create .nym_aliases file in home directory
     let home_dir = dirs::home_dir().unwrap();
-    let alias_file = home_dir.join(".nym_aliases");
+    let nymdir = home_dir.join(".nym");
+    let nymrc = nymdir.join("nymrc");
+    let nym_db = nymdir.join("nym.db");
 
-    // If .alias file already exists, ask user if they want to overwirte it
-    if alias_file.exists()
+    if nymdir.exists()
         && !helpers::questions::yesno!("Alias file already exists. Do you want to overwrite it?")
             .unwrap()
     {
@@ -71,13 +72,28 @@ pub fn install(json_file: &str, shell_profile: &str) {
         std::process::exit(1);
     }
 
+    std::fs::create_dir(nymdir).expect("Error creating .nym directory");
+    std::fs::write(nymrc.clone(), "").expect("Error creating nym config files");
+    std::fs::write(nym_db.clone(), "").expect("Error creating nym config files");
+
+    // let alias_file = home_dir.join(".nym_aliases");
+    //
+    // // If .alias file already exists, ask user if they want to overwirte it
+    // if alias_file.exists()
+    //     && !helpers::questions::yesno!("Alias file already exists. Do you want to overwrite it?")
+    //         .unwrap()
+    // {
+    //     eprintln!("{}", style("Exiting").italic());
+    //     std::process::exit(1);
+    // }
+
     // Create .nym_aliases file
-    std::fs::write(alias_file.clone(), "").expect("Error writing to file");
+    // std::fs::write(alias_file.clone(), "").expect("Error writing to file");
 
     // Add source command to shell profile file
     let source_command = format!(
         "source {}",
-        alias_file.clone().into_os_string().into_string().unwrap()
+        nymrc.clone().into_os_string().into_string().unwrap()
     );
     let source_command = source_command.as_str();
 
@@ -100,7 +116,7 @@ pub fn install(json_file: &str, shell_profile: &str) {
         .expect("Error writing to shell profile");
 
     // set alias file in nymdata
-    crate::file_management::json::set_alias_file(json_file, alias_file.to_str().unwrap());
+    // crate::file_management::json::set_alias_file(json_file, alias_file.to_str().unwrap());
 
     success!(format!(
         "Nym installed successfully\nPlease restart your shell to complete the installation {}",

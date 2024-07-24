@@ -79,12 +79,6 @@ pub fn add_alias(
     update_runcom(runcom_file, db_file);
 }
 
-macro_rules! add_alias_command {
-    ($command: expr, $description: expr, $group_is: expr) => {
-        add_alias("testrc", "test.db", $command, $description, $group_id);
-    };
-}
-
 #[cfg(test)]
 mod tests {
     use crate::new_file_management::{database::aliases::get_all_aliases, runcom::read_aliases};
