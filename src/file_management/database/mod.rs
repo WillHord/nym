@@ -13,7 +13,7 @@ use rusqlite::{params, Connection, Result};
 // }
 
 // #[derive(Debug, Clone, Eq, PartialEq)]
-// pub struct NewAlias {
+// pub struct Alias {
 //     pub name: String,
 //     pub command: String,
 //     pub description: String,
@@ -25,7 +25,7 @@ use rusqlite::{params, Connection, Result};
 // pub struct Group {
 //     pub id: i32,
 //     pub name: String,
-//     pub aliases: Vec<NewAlias>,
+//     pub aliases: Vec<Alias>,
 // }
 //
 pub fn setupdb(db_path: &str) -> Result<Connection> {

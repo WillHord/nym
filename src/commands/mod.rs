@@ -1,8 +1,8 @@
 pub mod aliases;
 
 use crate::error;
-use crate::new_file_management::database::aliases::get_group_nameids;
-use crate::new_file_management::{database::setupdb, Group};
+use crate::file_management::database::aliases::get_group_nameids;
+use crate::file_management::{database::setupdb, Group};
 
 use console::style;
 

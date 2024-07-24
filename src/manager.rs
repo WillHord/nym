@@ -60,7 +60,7 @@ fn get_manager_option() -> ManagerOption {
 }
 
 fn bulk_remove_aliases(runcom_file: &str, db_file: &str) {
-    let conn = match crate::new_file_management::database::setupdb(db_file) {
+    let conn = match crate::file_management::database::setupdb(db_file) {
         Ok(conn) => conn,
         Err(_) => {
             error!("issue connecting to database");
@@ -68,7 +68,7 @@ fn bulk_remove_aliases(runcom_file: &str, db_file: &str) {
         }
     };
 
-    let aliases = crate::new_file_management::database::aliases::get_all_aliases(&conn);
+    let aliases = crate::file_management::database::aliases::get_all_aliases(&conn);
 
     if aliases.is_empty() {
         error!("Could not find any aliases to remove");
@@ -98,7 +98,7 @@ fn bulk_remove_aliases(runcom_file: &str, db_file: &str) {
 }
 
 fn bulk_toggle_aliases(runcom_file: &str, db_file: &str) {
-    let conn = match crate::new_file_management::database::setupdb(db_file) {
+    let conn = match crate::file_management::database::setupdb(db_file) {
         Ok(conn) => conn,
         Err(_) => {
             error!("issue connecting to database");
@@ -106,7 +106,7 @@ fn bulk_toggle_aliases(runcom_file: &str, db_file: &str) {
         }
     };
 
-    let aliases = crate::new_file_management::database::aliases::get_all_aliases(&conn);
+    let aliases = crate::file_management::database::aliases::get_all_aliases(&conn);
 
     if aliases.is_empty() {
         error!("Could not find any aliases to toggle");
@@ -149,7 +149,7 @@ fn bulk_toggle_aliases(runcom_file: &str, db_file: &str) {
 }
 
 fn rename_alias(runcom_file: &str, db_file: &str) {
-    let conn = match crate::new_file_management::database::setupdb(db_file) {
+    let conn = match crate::file_management::database::setupdb(db_file) {
         Ok(conn) => conn,
         Err(_) => {
             error!("issue connecting to database");
@@ -157,7 +157,7 @@ fn rename_alias(runcom_file: &str, db_file: &str) {
         }
     };
 
-    let aliases = crate::new_file_management::database::aliases::get_all_aliases(&conn);
+    let aliases = crate::file_management::database::aliases::get_all_aliases(&conn);
 
     if aliases.is_empty() {
         error!("Could not find any aliases to rename");

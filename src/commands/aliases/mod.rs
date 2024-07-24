@@ -5,16 +5,16 @@ pub mod remove;
 
 use crate::{
     helpers::messages::error,
-    new_file_management::{
+    file_management::{
         database::{aliases::get_all_aliases, setupdb},
-        NewAlias,
+        Alias,
     },
 };
 use console::style;
 use fancy_regex::Regex;
 use inquire::Confirm;
 
-fn confirm_alias(alias: &NewAlias) -> bool {
+fn confirm_alias(alias: &Alias) -> bool {
     // Ask for confirmation
     crate::helpers::questions::yesno!(format!("Did you mean {}?", alias.name)).unwrap()
 }
@@ -32,7 +32,7 @@ pub fn validate_alias(alias: &str) -> bool {
     }
 }
 
-pub fn fuzzy_get_alias(name: &str, db_path: &str) -> Option<NewAlias> {
+pub fn fuzzy_get_alias(name: &str, db_path: &str) -> Option<Alias> {
     // A function to get an alias by name, but also get the closest match if the name doesn't exist
     let conn = match setupdb(db_path) {
         Ok(conn) => conn,
@@ -42,7 +42,7 @@ pub fn fuzzy_get_alias(name: &str, db_path: &str) -> Option<NewAlias> {
         }
     };
     let aliases = get_all_aliases(&conn);
-    let mut closest_match: Option<NewAlias> = None;
+    let mut closest_match: Option<Alias> = None;
     let mut closest_distance = usize::MAX;
 
     for alias in aliases {

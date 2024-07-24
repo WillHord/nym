@@ -1,10 +1,10 @@
-use crate::new_file_management::database::aliases::add_alias as db_add_alias;
-use crate::new_file_management::update_runcom;
+use crate::file_management::database::aliases::add_alias as db_add_alias;
+use crate::file_management::update_runcom;
 use crate::{
     error,
-    new_file_management::{
+    file_management::{
         database::{aliases::get_alias_by_name, setupdb},
-        NewAlias,
+        Alias,
     },
     success,
 };
@@ -55,7 +55,7 @@ pub fn add_alias(
         }
     }
 
-    let alias = NewAlias {
+    let alias = Alias {
         name: name.to_string(),
         command: alias_command,
         description: description.to_string(),
@@ -81,7 +81,7 @@ pub fn add_alias(
 
 #[cfg(test)]
 mod tests {
-    use crate::new_file_management::{database::aliases::get_all_aliases, runcom::read_aliases};
+    use crate::file_management::{database::aliases::get_all_aliases, runcom::read_aliases};
 
     use super::*;
 
@@ -95,7 +95,7 @@ mod tests {
         add_alias(rc_path, db_path, command1, "", 1);
 
         let aliases = get_all_aliases(&conn);
-        let alias_truth = vec![NewAlias {
+        let alias_truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -107,7 +107,7 @@ mod tests {
         let rc_aliases = read_aliases(rc_path).unwrap();
         assert_eq!(
             rc_aliases,
-            vec![NewAlias {
+            vec![Alias {
                 name: "test1".to_string(),
                 command: r#"echo "test command 1""#.to_string(),
                 description: "".to_string(),

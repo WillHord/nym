@@ -1,4 +1,4 @@
-use crate::new_file_management::{Group, NewAlias};
+use crate::file_management::{Group, Alias};
 use fancy_regex::Regex;
 
 fn capture_aliases(from_str: &str) -> Vec<String> {
@@ -14,7 +14,7 @@ fn capture_aliases(from_str: &str) -> Vec<String> {
     aliases
 }
 
-pub fn read_aliases(runcom_file: &str) -> Result<Vec<NewAlias>, &'static str> {
+pub fn read_aliases(runcom_file: &str) -> Result<Vec<Alias>, &'static str> {
     let runcom = match std::fs::read_to_string(runcom_file) {
         Ok(runcom) => runcom,
         Err(_) => return Err("Error reading from runcom file"),
@@ -31,7 +31,7 @@ pub fn read_aliases(runcom_file: &str) -> Result<Vec<NewAlias>, &'static str> {
     for alias_string in alias_strings {
         let line = alias_string[6..].to_string();
         let split: Vec<&str> = line.split('=').collect();
-        aliases.push(NewAlias {
+        aliases.push(Alias {
             name: split[0].to_string(),
             command: split[1][1..split[1].len() - 1]
                 .to_string()
@@ -67,7 +67,7 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Group, NewAlias};
+    use super::super::{Group, Alias};
     use super::*;
 
     #[test]
@@ -93,28 +93,28 @@ mod tests {
 
     #[test]
     fn runcom_read_write() {
-        let alias1 = NewAlias {
+        let alias1 = Alias {
             name: "test_alias_1".to_string(),
             command: "echo \"test alias 1\"".to_string(),
             description: "".to_string(),
             enabled: true,
             group_id: 0,
         };
-        let alias2 = NewAlias {
+        let alias2 = Alias {
             name: "test_alias_2".to_string(),
             command: "echo \"test alias 2\"".to_string(),
             description: "".to_string(),
             enabled: true,
             group_id: 0,
         };
-        let alias3 = NewAlias {
+        let alias3 = Alias {
             name: "test_alias_3".to_string(),
             command: "echo \"test alias 3\"".to_string(),
             description: "".to_string(),
             enabled: true,
             group_id: 0,
         };
-        let alias4 = NewAlias {
+        let alias4 = Alias {
             name: "test_alias_4".to_string(),
             command: "echo \"test alias 4\"".to_string(),
             description: "".to_string(),

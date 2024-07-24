@@ -4,9 +4,9 @@ use crate::{
         fuzzy_get_group,
     },
     error,
-    new_file_management::{
+    file_management::{
         database::{aliases::update_alias, setupdb},
-        update_runcom, Group, NewAlias,
+        update_runcom,
     },
     success,
 };
@@ -172,10 +172,10 @@ mod tests {
     use super::super::add::add_alias;
     use super::*;
 
-    use crate::new_file_management::database::aliases::get_all_aliases;
-    use crate::new_file_management::database::groups::create_group;
-    use crate::new_file_management::runcom::read_aliases;
-    use crate::new_file_management::NewAlias;
+    use crate::file_management::database::aliases::get_all_aliases;
+    use crate::file_management::database::groups::create_group;
+    use crate::file_management::runcom::read_aliases;
+    use crate::file_management::Alias;
 
     #[test]
     fn test_toggle_alias() {
@@ -187,7 +187,7 @@ mod tests {
         add_alias(rc_path, db_path, command1, "", 1);
 
         let aliases = get_all_aliases(&conn);
-        let alias_truth = vec![NewAlias {
+        let alias_truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -199,7 +199,7 @@ mod tests {
         let rc_aliases = read_aliases(rc_path).unwrap();
         assert_eq!(
             rc_aliases,
-            vec![NewAlias {
+            vec![Alias {
                 name: "test1".to_string(),
                 command: r#"echo "test command 1""#.to_string(),
                 description: "".to_string(),
@@ -211,7 +211,7 @@ mod tests {
 
         toggle_alias(rc_path, db_path, "test1");
 
-        let truth = vec![NewAlias {
+        let truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -237,7 +237,7 @@ mod tests {
         add_alias(rc_path, db_path, command1, "", 1);
 
         let aliases = get_all_aliases(&conn);
-        let alias_truth = vec![NewAlias {
+        let alias_truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -249,7 +249,7 @@ mod tests {
         let rc_aliases = read_aliases(rc_path).unwrap();
         assert_eq!(
             rc_aliases,
-            vec![NewAlias {
+            vec![Alias {
                 name: "test1".to_string(),
                 command: r#"echo "test command 1""#.to_string(),
                 description: "".to_string(),
@@ -261,7 +261,7 @@ mod tests {
 
         rename(rc_path, db_path, "test1", "test2");
 
-        let truth = vec![NewAlias {
+        let truth = vec![Alias {
             name: "test2".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -285,7 +285,7 @@ mod tests {
         add_alias(rc_path, db_path, command1, "", 1);
 
         let aliases = get_all_aliases(&conn);
-        let alias_truth = vec![NewAlias {
+        let alias_truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -297,7 +297,7 @@ mod tests {
         let rc_aliases = read_aliases(rc_path).unwrap();
         assert_eq!(
             rc_aliases,
-            vec![NewAlias {
+            vec![Alias {
                 name: "test1".to_string(),
                 command: r#"echo "test command 1""#.to_string(),
                 description: "".to_string(),
@@ -310,7 +310,7 @@ mod tests {
         create_group(&conn, "test_group_1");
         move_alias_group(rc_path, db_path, "test1", "test_group_1");
 
-        let truth = vec![NewAlias {
+        let truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),

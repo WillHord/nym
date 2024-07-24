@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use clap::error::Result;
 use rusqlite::{params, Connection};
 
-use super::super::{Group, NewAlias};
+use super::super::{Group, Alias};
 
-pub fn add_alias(conn: &Connection, alias: &NewAlias) -> Result<(), &'static str> {
+pub fn add_alias(conn: &Connection, alias: &Alias) -> Result<(), &'static str> {
     let _ = match conn.execute(
         "INSERT INTO aliases (name, command, description, enabled, group_id) VALUES (?1, ?2, ?3, ?4, ?5)",
         params![alias.name, alias.command, alias.description, alias.enabled, alias.group_id],
@@ -19,7 +17,7 @@ pub fn add_alias(conn: &Connection, alias: &NewAlias) -> Result<(), &'static str
     Ok(())
 }
 
-pub fn get_all_aliases(conn: &Connection) -> Vec<NewAlias> {
+pub fn get_all_aliases(conn: &Connection) -> Vec<Alias> {
     let mut alias_query = conn.prepare("SELECT * FROM aliases;").unwrap();
 
     let mut rows = alias_query.query([]).unwrap();
@@ -32,7 +30,7 @@ pub fn get_all_aliases(conn: &Connection) -> Vec<NewAlias> {
         let enabled: bool = row.get("enabled").unwrap();
         let group_id: i32 = row.get("group_id").unwrap();
 
-        aliases.push(NewAlias {
+        aliases.push(Alias {
             name,
             command,
             description,
@@ -59,13 +57,13 @@ pub fn get_groups_and_aliases(conn: &Connection) -> Vec<Group> {
     groups
 }
 
-pub fn get_alias_by_name(conn: &Connection, name: &str) -> Result<NewAlias, &'static str> {
+pub fn get_alias_by_name(conn: &Connection, name: &str) -> Result<Alias, &'static str> {
     let mut alias_query = conn
         .prepare("SELECT * FROM aliases WHERE name == (?1);")
         .unwrap();
     let mut rows = alias_query.query([name]).unwrap();
     if let Some(row) = rows.next().unwrap() {
-        Ok(NewAlias {
+        Ok(Alias {
             name: row.get("name").unwrap(),
             command: row.get("command").unwrap(),
             description: row.get("description").unwrap_or("".to_string()),
@@ -107,7 +105,7 @@ pub fn get_group_nameids(conn: &Connection) -> Result<Vec<Group>, &'static str> 
 pub fn update_alias(
     conn: &Connection,
     old_alias_name: &str,
-    updated_alias: NewAlias,
+    updated_alias: Alias,
 ) -> Result<(), &'static str> {
     match conn.execute(
         "UPDATE aliases SET 
@@ -133,9 +131,9 @@ pub fn update_alias(
 
 #[cfg(test)]
 mod tests {
-    use crate::new_file_management::database::groups::{self, get_groups};
+    use crate::file_management::database::groups::get_groups;
 
-    use super::super::super::NewAlias;
+    use super::super::super::Alias;
     use super::super::setupdb;
     use super::*;
 
@@ -147,14 +145,14 @@ mod tests {
             Err(_) => return,
         };
         assert!(std::path::Path::new(test_db).exists());
-        let alias1 = NewAlias {
+        let alias1 = Alias {
             name: "alias1".to_string(),
             command: "echo 'test'".to_string(),
             description: "".to_string(),
             enabled: true,
             group_id: 1,
         };
-        let alias2 = NewAlias {
+        let alias2 = Alias {
             name: "alias2".to_string(),
             command: "echo 'test 2'".to_string(),
             description: "description".to_string(),
@@ -198,7 +196,7 @@ mod tests {
         let alias_vec = get_all_aliases(&conn);
         assert_eq!(vec![alias2], alias_vec);
 
-        let updated_alias = NewAlias {
+        let updated_alias = Alias {
             name: "alias2".to_string(),
             command: "echo 'updated_alias'".to_string(),
             description: "description".to_string(),

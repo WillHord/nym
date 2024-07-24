@@ -1,7 +1,7 @@
 use super::{confirm_alias, fuzzy_get_alias};
-use crate::new_file_management::database::aliases::remove_alias as remove_alias_from_database;
-use crate::new_file_management::database::setupdb;
-use crate::new_file_management::update_runcom;
+use crate::file_management::database::aliases::remove_alias as remove_alias_from_database;
+use crate::file_management::database::setupdb;
+use crate::file_management::update_runcom;
 use crate::{error, success};
 use console::style;
 use inquire::Confirm;
@@ -59,9 +59,9 @@ mod tests {
     use super::super::add::add_alias;
     use super::*;
 
-    use crate::new_file_management::database::aliases::get_all_aliases;
-    use crate::new_file_management::runcom::read_aliases;
-    use crate::new_file_management::NewAlias;
+    use crate::file_management::database::aliases::get_all_aliases;
+    use crate::file_management::runcom::read_aliases;
+    use crate::file_management::Alias;
 
     #[test]
     fn test_remove_alias() {
@@ -73,7 +73,7 @@ mod tests {
         add_alias(rc_path, db_path, command1, "", 1);
 
         let aliases = get_all_aliases(&conn);
-        let alias_truth = vec![NewAlias {
+        let alias_truth = vec![Alias {
             name: "test1".to_string(),
             command: r#"echo "test command 1""#.to_string(),
             description: "".to_string(),
@@ -85,7 +85,7 @@ mod tests {
         let rc_aliases = read_aliases(rc_path).unwrap();
         assert_eq!(
             rc_aliases,
-            vec![NewAlias {
+            vec![Alias {
                 name: "test1".to_string(),
                 command: r#"echo "test command 1""#.to_string(),
                 description: "".to_string(),

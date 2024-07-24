@@ -19,9 +19,13 @@ fn check_installed(shell_profile: &str) -> bool {
 
     // The program is installed if the alias file exists and the source command is in the shell profile file
     let home_dir = dirs::home_dir().unwrap();
-    let alias_file = home_dir.join(".nym_aliases");
-    let alias_file = alias_file.to_str().unwrap();
-    if !Path::new(alias_file).exists() {
+    let nymdir = home_dir.join(".nym");
+    let nymrc = nymdir.join("nymrc");
+
+    // let home_dir = dirs::home_dir().unwrap();
+    // let alias_file = home_dir.join(".nym_aliases");
+    // let alias_file = alias_file.to_str().unwrap();
+    if !nymrc.exists() {
         return false;
     }
 
@@ -32,7 +36,7 @@ fn check_installed(shell_profile: &str) -> bool {
 
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
-    if contents.contains(alias_file) {
+    if contents.contains(nymrc.to_str().unwrap()) {
         return true;
     }
 
@@ -64,6 +68,7 @@ pub fn install(shell_profile: &str) {
     let nymrc = nymdir.join("nymrc");
     let nym_db = nymdir.join("nym.db");
 
+    // TODO: Fix this so if no then skip over creating nym dir instead of exiting
     if nymdir.exists()
         && !helpers::questions::yesno!("Alias file already exists. Do you want to overwrite it?")
             .unwrap()
@@ -75,20 +80,6 @@ pub fn install(shell_profile: &str) {
     std::fs::create_dir(nymdir).expect("Error creating .nym directory");
     std::fs::write(nymrc.clone(), "").expect("Error creating nym config files");
     std::fs::write(nym_db.clone(), "").expect("Error creating nym config files");
-
-    // let alias_file = home_dir.join(".nym_aliases");
-    //
-    // // If .alias file already exists, ask user if they want to overwirte it
-    // if alias_file.exists()
-    //     && !helpers::questions::yesno!("Alias file already exists. Do you want to overwrite it?")
-    //         .unwrap()
-    // {
-    //     eprintln!("{}", style("Exiting").italic());
-    //     std::process::exit(1);
-    // }
-
-    // Create .nym_aliases file
-    // std::fs::write(alias_file.clone(), "").expect("Error writing to file");
 
     // Add source command to shell profile file
     let source_command = format!(
@@ -141,7 +132,7 @@ pub fn install(shell_profile: &str) {
 //     Shell::None
 // }
 
-pub fn uninstall(json_file: &str, shell_profile: &str) {
+pub fn uninstall(shell_profile: &str) {
     // Remove alias file located in json_file.alias_file
     // Remove json file
     // Remove source command from shell profile file located in shell_profile
@@ -160,21 +151,20 @@ pub fn uninstall(json_file: &str, shell_profile: &str) {
         exit!(1);
     }
 
-    let alias_file = crate::file_management::json::get_alias_file(json_file);
-    let alias_file = alias_file.as_str();
+    let home_dir = dirs::home_dir().unwrap();
+    let nymdir = home_dir.join(".nym");
+    let nymrc = nymdir.join("nymrc");
 
-    match std::fs::remove_file(alias_file) {
-        Ok(_) => success!("Nym aliases file removed successfully"),
-        Err(e) => warning!(format!("Failed to remove file: {}", e)),
-    }
-
-    match std::fs::remove_file(json_file) {
-        Ok(_) => success!("Nym config file removed successfully"),
-        Err(e) => warning!(format!("Failed to remove file: {}", e)),
-    }
+    match std::fs::remove_dir_all(nymdir) {
+        Ok(_) => success!("Nym config files were removed successfully"),
+        Err(e) => warning!(format!("Failed to remove nym config files: {}", e)),
+    };
 
     // Remove source command from shell profile file
-    let source_command: String = format!("# Nym Alias File:\nsource {}", alias_file);
+    let source_command: String = format!(
+        "# Nym Alias File:\nsource {}",
+        nymrc.into_os_string().into_string().unwrap()
+    );
 
     let mut file = std::fs::OpenOptions::new()
         .read(true)

@@ -1,4 +1,4 @@
-use super::super::{Group, NewAlias};
+use super::super::{Group, Alias};
 use rusqlite::{params, Connection};
 
 pub fn create_group(conn: &Connection, name: &str) {
@@ -47,7 +47,7 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
             aliases: Vec::new(),
         });
 
-        group.aliases.push(NewAlias {
+        group.aliases.push(Alias {
             name: alias_name,
             command: alias_command,
             description: alias_description,
@@ -90,7 +90,7 @@ pub fn get_group_by_name(conn: &Connection, name: &str) -> Result<Group, &'stati
         let mut aliases = alias_query.query([group_id]).unwrap();
         let mut alias_vec = Vec::new();
         while let Some(alias) = aliases.next().unwrap() {
-            alias_vec.push(NewAlias {
+            alias_vec.push(Alias {
                 name: alias.get("name").unwrap(),
                 command: alias.get("command").unwrap(),
                 description: alias.get("description").unwrap_or("".to_string()),
@@ -173,7 +173,7 @@ mod tests {
 
         let _ = add_alias(
             &conn,
-            &NewAlias {
+            &Alias {
                 name: "test".to_string(),
                 command: "echo \"test\"".to_string(),
                 description: "".to_string(),
@@ -186,7 +186,7 @@ mod tests {
         let group_with_alias_truth = Group {
             id: 2,
             name: "group1".to_string(),
-            aliases: vec![NewAlias {
+            aliases: vec![Alias {
                 name: "test".to_string(),
                 command: "echo \"test\"".to_string(),
                 description: "".to_string(),
@@ -202,7 +202,7 @@ mod tests {
             Group {
                 id: 1,
                 name: "uncategorized".to_string(),
-                aliases: vec![NewAlias {
+                aliases: vec![Alias {
                     name: "test".to_string(),
                     command: "echo \"test\"".to_string(),
                     description: "".to_string(),

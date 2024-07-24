@@ -1,17 +1,17 @@
 mod commands;
 
+// mod file_management;
 mod file_management;
 mod helpers;
-mod new_file_management;
 
 mod install;
-mod list;
+// mod list;
 mod manager;
 // TODO: Delete after refactoring manager
-mod old_commands;
+// mod old_commands;
 
 use clap::{Arg, ArgAction, Command};
-use console::style;
+// use console::style;
 
 fn main() {
     let matches = Command::new("nym")
@@ -151,8 +151,7 @@ fn main() {
         }
         Some(("uninstall", sub_m)) => {
             let shell_profile = sub_m.get_one::<String>("shell_profile").unwrap();
-            // crate::install::uninstall(json_file, shell_profile);
-            unimplemented!("temp disabled - need to refactor uninstall")
+            crate::install::uninstall(shell_profile);
         }
         Some(("rename", sub_m)) => {
             let old_name = sub_m.get_one::<String>("old_name").unwrap();

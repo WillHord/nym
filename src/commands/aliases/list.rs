@@ -1,6 +1,6 @@
 use crate::{
     error,
-    new_file_management::database::{aliases::get_all_aliases, setupdb},
+    file_management::database::{aliases::get_all_aliases, setupdb},
     warning,
 };
 use console::style;
