@@ -14,7 +14,7 @@ pub mod runcom;
 //     pub enabled: bool,
 // }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Alias {
     pub name: String,
     pub command: String,
@@ -23,7 +23,7 @@ pub struct Alias {
     pub group_id: i32,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Group {
     pub id: i32,
     pub name: String,

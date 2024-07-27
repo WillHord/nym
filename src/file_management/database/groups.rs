@@ -1,4 +1,4 @@
-use super::super::{Group, Alias};
+use super::super::{Alias, Group};
 use rusqlite::{params, Connection};
 
 pub fn create_group(conn: &Connection, name: &str) {
@@ -39,7 +39,6 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
         let alias_command: String = row.get("alias_command").unwrap();
         let alias_description: String = row.get("description").unwrap_or("".to_string());
         let alias_enabled: bool = row.get("alias_enabled").unwrap();
-        println!("alias: {}", alias_name);
 
         let group = group_map.entry(group_id).or_insert_with(|| Group {
             id: group_id,
@@ -133,6 +132,18 @@ pub fn remove_group(conn: &Connection, name: &str) -> Result<(), &'static str> {
     match conn.execute("DELETE FROM groups WHERE id == (?1)", params![group.id]) {
         Ok(_) => Ok(()),
         Err(_) => Err("Error deleting group"),
+    }
+}
+
+pub fn edit_group(conn: &Connection, group_name: &str, group: Group) -> Result<(), &'static str> {
+    match conn.execute(
+        "UPDATE groups SET 
+            name = (?1)
+            WHERE name = (?2)",
+        [group.name, group_name.to_string()],
+    ) {
+        Ok(_) => Ok(()),
+        Err(_) => Err("Error updating group"),
     }
 }
 

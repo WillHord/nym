@@ -1,7 +1,7 @@
 use crate::{
     commands::{
         aliases::{confirm_alias, fuzzy_get_alias},
-        fuzzy_get_group,
+        groups::fuzzy_get_group,
     },
     error,
     file_management::{
