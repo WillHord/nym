@@ -1,6 +1,7 @@
-use crate::file_management::{Group, Alias};
+use crate::file_management::{Alias, Group};
 use fancy_regex::Regex;
 
+#[allow(dead_code)]
 fn capture_aliases(from_str: &str) -> Vec<String> {
     //TODO: split by groups
     let re = Regex::new(r#"(?:alias\s+)?(\w+)=([\'"])((?:\\.|(?!\2).)*)\2"#).unwrap();
@@ -14,6 +15,7 @@ fn capture_aliases(from_str: &str) -> Vec<String> {
     aliases
 }
 
+#[allow(dead_code)]
 pub fn read_aliases(runcom_file: &str) -> Result<Vec<Alias>, &'static str> {
     let runcom = match std::fs::read_to_string(runcom_file) {
         Ok(runcom) => runcom,
@@ -67,7 +69,7 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Group, Alias};
+    use super::super::{Alias, Group};
     use super::*;
 
     #[test]

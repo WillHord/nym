@@ -15,7 +15,8 @@ fn main() {
         .subcommand(
             Command::new("list")
                 .about("List all aliases")
-                .subcommand(Command::new("group").about("List all groups"))
+                .subcommand(Command::new("groups").about("List all groups"))
+                // TODO: Add command to list everything in a group
                 .subcommand(
                     Command::new("alias").about("List all aliases").arg(
                         Arg::new("disabled")
@@ -163,6 +164,20 @@ fn main() {
                         .required(true)
                         .help("The name of the alias to view description of"),
                 ),
+        )
+        .subcommand(
+            Command::new("move")
+                .about("Move alias to a different group")
+                .arg(
+                    Arg::new("alias")
+                        .required(true)
+                        .help("The name of the alias to move"),
+                )
+                .arg(
+                    Arg::new("group")
+                        .help("The name of the group to move the alias to")
+                        .required(true),
+                ),
         );
     let matches = commands.clone().get_matches();
 
@@ -193,31 +208,22 @@ fn main() {
         .unwrap();
 
     match matches.subcommand() {
-        Some(("list", sub_m)) => {
-            match sub_m.subcommand() {
-                Some(("group", _)) => {
-                    println!("Listing groups");
-                    crate::commands::groups::list::list_groups(&nym_db);
-                }
-                Some(("alias", sub_m)) => {
-                    println!("Listing aliases");
-                    crate::commands::aliases::list::list_aliases(
-                        &nym_db,
-                        *sub_m.get_one("disabled").unwrap_or(&false),
-                    );
-                }
-                _ => {
-                    // TODO: Change this to list aliases by group
-                    // Display help message
-                    commands
-                        .find_subcommand("list")
-                        .unwrap()
-                        .clone()
-                        .print_help()
-                        .unwrap();
-                }
+        Some(("list", sub_m)) => match sub_m.subcommand() {
+            Some(("group", _)) => {
+                println!("Listing groups");
+                crate::commands::groups::list::list_groups(&nym_db);
             }
-        }
+            Some(("alias", sub_m)) => {
+                println!("Listing aliases");
+                crate::commands::aliases::list::list_aliases(
+                    &nym_db,
+                    *sub_m.get_one("disabled").unwrap_or(&false),
+                );
+            }
+            _ => {
+                crate::commands::groups::list::list_all(&nym_db);
+            }
+        },
         Some(("add", sub_m)) => {
             match sub_m.subcommand() {
                 Some(("group", sub_m)) => {
@@ -328,6 +334,11 @@ fn main() {
                         .unwrap();
                 }
             }
+        }
+        Some(("move", sub_m)) => {
+            let alias = sub_m.get_one::<String>("alias").unwrap();
+            let group = sub_m.get_one::<String>("group").unwrap();
+            crate::commands::aliases::edit::move_alias_group(&nymrc, &nym_db, alias, group);
         }
         _ => {
             crate::manager::alias_manager(&nymrc, &nym_db);
