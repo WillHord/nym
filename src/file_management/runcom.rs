@@ -50,6 +50,9 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
     let mut runcom = String::new();
     runcom.push_str("###############Aliases###############\n");
 
+    let parent_path = std::path::Path::new(runcom_file).parent().unwrap();
+    let script_dir = parent_path.join("scripts");
+
     for group in groups {
         runcom.push_str(&format!("\n##########{}##########\n", group.name));
         for alias in group.aliases {
@@ -57,6 +60,12 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
                 // Replace double quotes with \" to escape them
                 let alias_command = alias.command.replace('\"', "\\\"");
                 runcom.push_str(&format!("alias {}=\"{}\"\n", alias.name, alias_command));
+            }
+        }
+
+        for script in group.scripts {
+            if script.enabled {
+                runcom.push_str(&format!("export PATH=$PATH:{}\n", script.path));
             }
         }
     }
@@ -128,12 +137,14 @@ mod tests {
             id: 1,
             name: "uncategorized".to_string(),
             aliases: vec![alias1.clone(), alias2.clone()],
+            scripts: Vec::new(),
         };
 
         let group2 = Group {
             id: 2,
             name: "group1".to_string(),
             aliases: vec![alias3.clone(), alias4],
+            scripts: Vec::new(),
         };
 
         assert_eq!(Ok(()), write_to_runcom("test1rc", vec![group1, group2]));

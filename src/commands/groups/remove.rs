@@ -89,6 +89,7 @@ mod tests {
                 id: 1,
                 name: "uncategorized".to_string(),
                 aliases: Vec::new(),
+                scripts: Vec::new(),
             }]
         );
 

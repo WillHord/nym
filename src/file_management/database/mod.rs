@@ -1,5 +1,6 @@
 pub mod aliases;
 pub mod groups;
+pub mod scripts;
 
 use crate::error;
 use console::style;
@@ -43,6 +44,21 @@ pub fn setupdb(db_path: &str) -> Result<Connection> {
         Ok(_) => (),
         Err(err) => eprintln!("Error: {}", err),
     };
+
+    if let Err(err) = conn.execute(
+        "CREATE TABLE IF NOT EXISTS scripts (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE,
+            path TEXT NOT NULL,
+            description TEXT,
+            enabled INTEGER NOT NULL CHECK (enabled IN (0, 1)),
+            group_id INTEGER NOT NULL,
+            FOREIGN KEY (group_id) REFERENCES groups (id)
+        )",
+        [],
+    ) {
+        eprintln!("Error: {}", err);
+    }
 
     let _ = conn.execute(
         "INSERT INTO groups (name) VALUES (?1)",

@@ -73,9 +73,10 @@ pub fn install(shell_profile: &str) {
         std::process::exit(1);
     }
 
-    std::fs::create_dir(nymdir).expect("Error creating .nym directory");
+    std::fs::create_dir(nymdir.clone()).expect("Error creating .nym directory");
     std::fs::write(nymrc.clone(), "").expect("Error creating nym config files");
     std::fs::write(nym_db.clone(), "").expect("Error creating nym config files");
+    std::fs::create_dir(nymdir.join("scripts")).expect("Error creating scripts directory");
 
     // Add source command to shell profile file
     let source_command = format!(

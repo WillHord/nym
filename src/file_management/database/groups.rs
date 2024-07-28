@@ -44,6 +44,7 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
             id: group_id,
             name: group_name,
             aliases: Vec::new(),
+            scripts: Vec::new(),
         });
 
         group.aliases.push(Alias {
@@ -64,6 +65,7 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
             id: group_id,
             name: group_name,
             aliases: Vec::new(),
+            scripts: Vec::new(),
         });
     }
 
@@ -101,6 +103,7 @@ pub fn get_group_by_name(conn: &Connection, name: &str) -> Result<Group, &'stati
             id: group_id,
             name: row.get("name").unwrap(),
             aliases: alias_vec,
+            scripts: Vec::new(),
         })
     } else {
         Err("Could not file group")
@@ -166,6 +169,7 @@ mod tests {
             id: 1,
             name: "uncategorized".to_string(),
             aliases: Vec::new(),
+            scripts: Vec::new(),
         }];
         assert_eq!(curr_groups, base_groups);
         create_group(&conn, "group1");
@@ -175,6 +179,7 @@ mod tests {
             id: 2,
             name: "group1".to_string(),
             aliases: Vec::new(),
+            scripts: Vec::new(),
         });
         curr_groups.sort_by(|a, b| a.id.cmp(&b.id));
         assert_eq!(curr_groups, add_groups);
@@ -204,6 +209,7 @@ mod tests {
                 enabled: true,
                 group_id: 2,
             }],
+            scripts: Vec::new(),
         };
         assert_eq!(group_with_alias, group_with_alias_truth);
 
@@ -219,7 +225,8 @@ mod tests {
                     description: "".to_string(),
                     enabled: true,
                     group_id: 1,
-                }]
+                }],
+                scripts: Vec::new(),
             }
         );
 

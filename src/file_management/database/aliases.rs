@@ -95,6 +95,7 @@ pub fn get_group_nameids(conn: &Connection) -> Result<Vec<Group>, &'static str> 
             id: group_id,
             name,
             aliases: Vec::new(),
+            scripts: Vec::new(),
         });
     }
 
@@ -166,6 +167,7 @@ mod tests {
                 id: 1,
                 name: "uncategorized".to_string(),
                 aliases: Vec::new(),
+                scripts: Vec::new(),
             }]
         );
 
@@ -181,6 +183,7 @@ mod tests {
                 id: 1,
                 name: "uncategorized".to_string(),
                 aliases: vec![alias1.clone()],
+                scripts: Vec::new(),
             }]
         );
 

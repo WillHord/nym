@@ -7,12 +7,22 @@ use console::style;
 pub mod database;
 pub mod runcom;
 
-// pub struct Script {
-//     pub name: String,
-//     pub location: String,
-//     pub description: String,
-//     pub enabled: bool,
+// #[allow(dead_code)]
+// #[derive(Debug)]
+// pub enum ScriptType {
+//     Executable,
+//     Python,
 // }
+
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
+pub struct Script {
+    pub name: String,
+    pub path: String,
+    pub description: String,
+    pub enabled: bool,
+    pub group_id: i32,
+    // pub type_: ScriptType,
+}
 
 #[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 pub struct Alias {
@@ -28,6 +38,7 @@ pub struct Group {
     pub id: i32,
     pub name: String,
     pub aliases: Vec<Alias>,
+    pub scripts: Vec<Script>,
 }
 
 pub fn update_runcom(runcom_file: &str, db_file: &str) {

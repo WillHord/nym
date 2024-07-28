@@ -75,11 +75,13 @@ mod tests {
                     id: 1,
                     name: "uncategorized".to_string(),
                     aliases: Vec::new(),
+                    scripts: Vec::new(),
                 },
                 Group {
                     id: 2,
                     name: "newgroupname".to_string(),
                     aliases: Vec::new(),
+                    scripts: Vec::new(),
                 }
             ]
         );
