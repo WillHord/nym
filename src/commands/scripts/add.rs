@@ -21,7 +21,7 @@ pub fn add_script(
 ) {
     let conn = db_conn(db_file);
     // Check if script exists
-    if let Ok(_x) = get_script_by_name(&conn, script_path) {
+    if get_script_by_name(&conn, script_path).is_ok() {
         error!("Script already exists");
         return;
     }
@@ -39,52 +39,51 @@ pub fn add_script(
 
     let scripts_dir = parent_dir.join("scripts");
     let script_name_no_ext = script_name.split('.').collect::<Vec<&str>>()[0];
-    if !scripts_dir.exists() {
-        if let Err(_x) = std::fs::create_dir(&scripts_dir) {
-            error!("Issue creating scripts directory");
-            return;
-        }
+    if !scripts_dir.exists() && std::fs::create_dir(&scripts_dir).is_err() {
+        error!("Issue creating scripts directory");
+        return;
     }
+
     // Create folder in scripts directory
-    if let Err(_x) = std::fs::create_dir(scripts_dir.join(script_name_no_ext.clone())) {
+    if std::fs::create_dir(scripts_dir.join(script_name_no_ext)).is_err() {
         error!("Issue creating script directory");
         return;
     }
 
     // Copy script to scripts directory
-    if let Err(_x) = std::fs::copy(
+    if std::fs::copy(
         script_path,
         scripts_dir
             .join(script_name_no_ext)
             .join(script_name.clone()),
-    ) {
+    )
+    .is_err()
+    {
         error!("Issue copying script to scripts directory");
         return;
     }
 
+    let script = Script {
+        name: script_name_no_ext.to_string(),
+        path: scripts_dir
+            .join(script_name_no_ext)
+            .join(script_name.clone())
+            .to_str()
+            .unwrap()
+            .to_string(),
+        description: description.to_string(),
+        enabled: true,
+        group_id,
+    };
+
     // Add script to database
-    if let Err(_x) = add_script_to_database(
-        &conn,
-        &Script {
-            name: script_name_no_ext.to_string(),
-            path: scripts_dir
-                .join(script_name_no_ext)
-                .join(script_name.clone())
-                .to_str()
-                .unwrap()
-                .to_string(),
-            description: description.to_string(),
-            enabled: true,
-            group_id,
-        },
-    ) {
+    if add_script_to_database(&conn, &script).is_err() {
         error!("Issue adding script to database");
         return;
     }
 
     // Update runcom file
-    // TODO: update runcom to include paths
-    // update_runcom(rc_file, db_file);
+    update_runcom(rc_file, db_file);
     success!("Script added successfully");
 }
 

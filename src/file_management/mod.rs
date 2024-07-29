@@ -1,7 +1,7 @@
-use database::{aliases::get_groups_and_aliases, setupdb};
+use database::setupdb;
 use runcom::write_to_runcom;
 
-use crate::error;
+use crate::{commands::get_groups_and_aliases, error};
 use console::style;
 
 pub mod database;

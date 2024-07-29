@@ -3,19 +3,20 @@ use rusqlite::{params, Connection};
 use crate::file_management::Script;
 
 pub fn add_script(conn: &Connection, script: &Script) -> Result<(), &'static str> {
-    if let Err(_x) = conn.execute(
-        "INSERT INTO scripts (name, path, description, enabled, group_id) VALUES (?1, ?2, ?3, ?4, ?5)",
-        params![
-            script.name,
-            script.path,
-            script.description,
-            script.enabled,
-            script.group_id
+    println!("!Adding script: {:?}", script);
+    match conn.execute(
+        "INSERT INTO scripts (name, path, description, enabled, group_id) VALUES (?1, ?2, ?3, ?4, ?5);",
+        [
+            script.name.to_string(),
+            script.path.to_string(),
+            script.description.to_string(),
+            (script.enabled as i32).to_string(),
+            script.group_id.to_string() 
         ],
     ) {
-        return Err("Error adding script to database");
+        Ok(_) => Ok(()),
+        Err(err) => { eprintln!("Error: {}", err); Err("Error adding script to database") },
     }
-    Ok(())
 }
 
 pub fn get_all_scripts(conn: &Connection) -> Vec<Script> {

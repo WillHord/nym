@@ -27,7 +27,8 @@ fn main() {
                     ),
                     // TODO: Add flags for listing by group
                     // TODO: Change disabled to enabled and allow true or false to be passed
-                ),
+                )
+                .subcommand(Command::new("scripts").about("List all scripts")),
         )
         .subcommand(
             Command::new("add")
@@ -61,6 +62,31 @@ fn main() {
                                 .long("group")
                                 .value_name("GROUP")
                                 .help("The group to add the alias to")
+                                .required(false),
+                        ),
+                )
+                .subcommand(
+                    Command::new("script")
+                        .about("Add a new script")
+                        .arg(
+                            Arg::new("path")
+                                .help("The path to the script")
+                                .required(true),
+                        )
+                        .arg(
+                            Arg::new("description")
+                                .short('d')
+                                .long("description")
+                                .value_name("DESCRIPTION")
+                                .help("A description of the script")
+                                .required(false),
+                        )
+                        .arg(
+                            Arg::new("group")
+                                .short('g')
+                                .long("group")
+                                .value_name("GROUP")
+                                .help("The group to add the script to")
                                 .required(false),
                         ),
                 ),
@@ -220,6 +246,10 @@ fn main() {
                     *sub_m.get_one("disabled").unwrap_or(&false),
                 );
             }
+            Some(("scripts", _)) => {
+                println!("Listing scripts");
+                crate::commands::scripts::list::list_scripts(&nym_db);
+            }
             _ => {
                 crate::commands::groups::list::list_all(&nym_db);
             }
@@ -255,6 +285,34 @@ fn main() {
                         &nymrc,
                         &nym_db,
                         &command,
+                        &description,
+                        group_id,
+                    );
+                }
+                Some(("script", sub_m)) => {
+                    println!("Adding script");
+                    let path = sub_m.get_one::<String>("path").unwrap().to_string();
+                    let description = sub_m
+                        .get_one::<String>("description")
+                        .unwrap_or(&"".to_string())
+                        .to_string();
+                    let group_name = sub_m
+                        .get_one::<String>("group")
+                        .unwrap_or(&"".to_string())
+                        .to_string();
+
+                    let group_id = if group_name.is_empty() {
+                        1
+                    } else {
+                        crate::commands::groups::ask_fuzzy_get(&nym_db, &group_name)
+                            .unwrap()
+                            .id
+                    };
+
+                    crate::commands::scripts::add::add_script(
+                        &nymrc,
+                        &nym_db,
+                        &path,
                         &description,
                         group_id,
                     );

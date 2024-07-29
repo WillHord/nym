@@ -4,7 +4,7 @@ pub mod remove;
 pub mod rename;
 
 use crate::error;
-use crate::file_management::database::aliases::get_group_nameids;
+use crate::file_management::database::groups::get_group_nameids;
 use crate::file_management::{database::setupdb, Group};
 
 use console::style;

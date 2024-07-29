@@ -50,8 +50,8 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
     let mut runcom = String::new();
     runcom.push_str("###############Aliases###############\n");
 
-    let parent_path = std::path::Path::new(runcom_file).parent().unwrap();
-    let script_dir = parent_path.join("scripts");
+    // let parent_path = std::path::Path::new(runcom_file).parent().unwrap();
+    // let script_dir = parent_path.join("scripts");
 
     for group in groups {
         runcom.push_str(&format!("\n##########{}##########\n", group.name));
@@ -65,7 +65,7 @@ pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'st
 
         for script in group.scripts {
             if script.enabled {
-                runcom.push_str(&format!("export PATH=$PATH:{}\n", script.path));
+                runcom.push_str(&format!("export PATH=$HOME/{}:$PATH\n", script.path));
             }
         }
     }

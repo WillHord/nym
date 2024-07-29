@@ -150,6 +150,27 @@ pub fn edit_group(conn: &Connection, group_name: &str, group: Group) -> Result<(
     }
 }
 
+pub fn get_group_nameids(conn: &Connection) -> Result<Vec<Group>, &'static str> {
+    let mut group_query = conn.prepare("SELECT * FROM groups;").unwrap();
+    let mut rows = group_query.query([]).unwrap();
+
+    let mut groups = Vec::new();
+
+    while let Some(row) = rows.next().unwrap() {
+        let group_id: i32 = row.get("id").unwrap();
+        let name: String = row.get("name").unwrap();
+
+        groups.push(Group {
+            id: group_id,
+            name,
+            aliases: Vec::new(),
+            scripts: Vec::new(),
+        });
+    }
+
+    Ok(groups)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

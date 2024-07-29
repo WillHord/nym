@@ -41,21 +41,6 @@ pub fn get_all_aliases(conn: &Connection) -> Vec<Alias> {
     aliases
 }
 
-pub fn get_groups_and_aliases(conn: &Connection) -> Vec<Group> {
-    let aliases = get_all_aliases(conn);
-    let mut groups = match get_group_nameids(conn) {
-        Ok(group_ids) => group_ids,
-        Err(_) => return Vec::new(),
-    };
-
-    for alias in aliases {
-        if let Some(group) = groups.iter_mut().find(|g| g.id == alias.group_id) {
-            group.aliases.push(alias);
-        }
-    }
-    groups
-}
-
 pub fn get_alias_by_name(conn: &Connection, name: &str) -> Result<Alias, &'static str> {
     let mut alias_query = conn
         .prepare("SELECT * FROM aliases WHERE name == (?1);")
@@ -79,27 +64,6 @@ pub fn remove_alias(conn: &Connection, name: &str) -> Result<(), &'static str> {
         Ok(_) => Ok(()),
         Err(_) => Err("Error deleting alias"),
     }
-}
-
-pub fn get_group_nameids(conn: &Connection) -> Result<Vec<Group>, &'static str> {
-    let mut group_query = conn.prepare("SELECT * FROM groups;").unwrap();
-    let mut rows = group_query.query([]).unwrap();
-
-    let mut groups = Vec::new();
-
-    while let Some(row) = rows.next().unwrap() {
-        let group_id: i32 = row.get("id").unwrap();
-        let name: String = row.get("name").unwrap();
-
-        groups.push(Group {
-            id: group_id,
-            name,
-            aliases: Vec::new(),
-            scripts: Vec::new(),
-        });
-    }
-
-    Ok(groups)
 }
 
 pub fn update_alias(
@@ -131,7 +95,7 @@ pub fn update_alias(
 
 #[cfg(test)]
 mod tests {
-    use crate::file_management::database::groups::get_groups;
+    use crate::file_management::database::groups::{get_group_nameids, get_groups};
 
     use super::super::super::Alias;
     use super::super::setupdb;

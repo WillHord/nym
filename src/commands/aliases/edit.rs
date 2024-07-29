@@ -134,13 +134,9 @@ pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, grou
         &alias.name,
         &alias,
         format!(
-            "Alias {} is now {}",
+            "Alias {} is now in group {}",
             style(alias.clone().name).italic().bold(),
-            if alias.enabled {
-                style("enabled").bold().green()
-            } else {
-                style("disabled").bold().red()
-            }
+            style(&group.name).bold().underlined()
         ),
     );
 }
