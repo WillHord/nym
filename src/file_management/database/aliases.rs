@@ -1,7 +1,7 @@
 use clap::error::Result;
 use rusqlite::{params, Connection};
 
-use super::super::{Alias, Group};
+use super::super::Alias;
 
 pub fn add_alias(conn: &Connection, alias: &Alias) -> Result<(), &'static str> {
     let _ = match conn.execute(

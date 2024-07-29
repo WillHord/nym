@@ -18,21 +18,33 @@ pub fn list_all(db_file: &str) {
 
     for group in groups {
         println!("{}", style(group.name).bold().underlined());
-        for alias in group.aliases {
-            if alias.enabled {
-                println!(
-                    "✅ {}-> {}",
-                    style(alias.name).green(),
-                    style(alias.command).green()
-                );
-            } else {
-                println!(
-                    "❌ {} -> {} ",
-                    style(alias.name).red(),
-                    style(alias.command).red()
-                );
+        if !group.aliases.is_empty() {
+            println!("    Aliases:");
+            for alias in group.aliases {
+                if alias.enabled {
+                    println!(
+                        "\t✅ {}-> {}",
+                        style(alias.name).green(),
+                        style(alias.command).green()
+                    );
+                } else {
+                    println!(
+                        "\t❌ {} -> {} ",
+                        style(alias.name).red(),
+                        style(alias.command).red()
+                    );
+                }
             }
         }
-        println!();
+        if !group.scripts.is_empty() {
+            println!("    Scripts:");
+            for script in group.scripts {
+                if script.enabled {
+                    println!("\t✅ {}", style(script.name).green());
+                } else {
+                    println!("\t❌ {}", style(script.name).red());
+                }
+            }
+        }
     }
 }

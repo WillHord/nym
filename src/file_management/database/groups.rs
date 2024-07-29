@@ -1,3 +1,5 @@
+use crate::file_management::Script;
+
 use super::super::{Alias, Group};
 use rusqlite::{params, Connection};
 
@@ -21,10 +23,16 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
             a.name as alias_name,
             a.command as alias_command,
             a.description as alias_description,
-            a.enabled as alias_enabled
+            a.enabled as alias_enabled,
+            s.name as script_name,
+            s.path as script_path,
+            s.description as script_description,
+            s.enabled as script_enabled
         FROM groups g
-        RIGHT JOIN aliases a
-        ON g.id = a.group_id;",
+        LEFT JOIN aliases a
+        ON g.id = a.group_id
+        LEFT JOIN scripts s 
+        ON g.id = s.group_id;",
         )
         .unwrap();
 
@@ -34,11 +42,15 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
     while let Some(row) = rows.next().unwrap() {
         let group_id: i32 = row.get("group_id").unwrap();
         let group_name: String = row.get("group_name").unwrap();
-        // let alias_id: i32 = row.get("alias_id").unwrap();
-        let alias_name: String = row.get("alias_name").unwrap();
-        let alias_command: String = row.get("alias_command").unwrap();
+        let alias_name: String = row.get("alias_name").unwrap_or("".to_string());
+        let alias_command: String = row.get("alias_command").unwrap_or("".to_string());
         let alias_description: String = row.get("description").unwrap_or("".to_string());
-        let alias_enabled: bool = row.get("alias_enabled").unwrap();
+        let alias_enabled: bool = row.get("alias_enabled").unwrap_or(false);
+
+        let script_name: String = row.get("script_name").unwrap_or("".to_string());
+        let script_path: String = row.get("script_path").unwrap_or("".to_string());
+        let script_description: String = row.get("script_description").unwrap_or("".to_string());
+        let script_enabled: bool = row.get("script_enabled").unwrap_or(false);
 
         let group = group_map.entry(group_id).or_insert_with(|| Group {
             id: group_id,
@@ -47,13 +59,25 @@ pub fn get_groups(conn: &Connection) -> Vec<Group> {
             scripts: Vec::new(),
         });
 
-        group.aliases.push(Alias {
-            name: alias_name,
-            command: alias_command,
-            description: alias_description,
-            enabled: alias_enabled,
-            group_id,
-        });
+        if !alias_name.is_empty() && !group.aliases.iter().any(|a| a.name == alias_name) {
+            group.aliases.push(Alias {
+                name: alias_name,
+                command: alias_command,
+                description: alias_description,
+                enabled: alias_enabled,
+                group_id,
+            });
+        }
+
+        if !script_name.is_empty() && !group.scripts.iter().any(|s| s.name == script_name) {
+            group.scripts.push(Script {
+                name: script_name,
+                path: script_path,
+                description: script_description,
+                enabled: script_enabled,
+                group_id,
+            });
+        }
     }
     let mut group_query = conn.prepare("SELECT * FROM groups;").unwrap();
     let mut rows = group_query.query([]).unwrap();

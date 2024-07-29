@@ -127,6 +127,23 @@ fn main() {
                                 .action(ArgAction::SetTrue)
                                 .required(false),
                         ),
+                )
+                .subcommand(
+                    Command::new("script")
+                        .about("Remove a script by name")
+                        .arg(
+                            Arg::new("name")
+                                .help("The name of the script to remove")
+                                .required(true),
+                        )
+                        .arg(
+                            Arg::new("force")
+                                .help("Force remove script")
+                                .short('f')
+                                .long("force")
+                                .action(ArgAction::SetTrue)
+                                .required(false),
+                        ),
                 ),
         )
         .subcommand(
@@ -159,14 +176,46 @@ fn main() {
                                 .help("The new name of the group")
                                 .required(true),
                         ),
+                )
+                .subcommand(
+                    Command::new("script")
+                        .about("Rename a script by name")
+                        .arg(
+                            Arg::new("old_name")
+                                .help("The name of the script to rename")
+                                .required(true),
+                        )
+                        .arg(
+                            Arg::new("new_name")
+                                .help("The new name of the script")
+                                .required(true),
+                        ),
                 ),
         )
         .subcommand(
-            Command::new("toggle").about("Toggle an alias by name").arg(
-                Arg::new("name")
-                    .help("The name of the alias to toggle")
-                    .required(true),
-            ),
+            Command::new("toggle")
+                .about("Toggle an alias by name")
+                .subcommand(
+                    Command::new("alias").about("Toggle an alias by name").arg(
+                        Arg::new("name")
+                            .help("The name of the alias to toggle")
+                            .required(true),
+                    ),
+                )
+                // .subcommand(
+                //     Command::new("group").about("Toggle a group by name").arg(
+                //         Arg::new("name")
+                //             .help("The name of the group to toggle")
+                //             .required(true),
+                //     ),
+                // )
+                .subcommand(
+                    Command::new("script").about("Toggle a script by name").arg(
+                        Arg::new("name")
+                            .help("The name of the script to toggle")
+                            .required(true),
+                    ),
+                ),
         )
         .subcommand(
             Command::new("install").about("Install Nym").arg(
@@ -193,16 +242,34 @@ fn main() {
         )
         .subcommand(
             Command::new("move")
-                .about("Move alias to a different group")
-                .arg(
-                    Arg::new("alias")
-                        .required(true)
-                        .help("The name of the alias to move"),
+                .about("Move alias or script to a different group")
+                .subcommand(
+                    Command::new("alias")
+                        .about("Move alias to a different group")
+                        .arg(
+                            Arg::new("alias")
+                                .required(true)
+                                .help("The name of the alias to move"),
+                        )
+                        .arg(
+                            Arg::new("group")
+                                .help("The name of the group to move the alias to")
+                                .required(true),
+                        ),
                 )
-                .arg(
-                    Arg::new("group")
-                        .help("The name of the group to move the alias to")
-                        .required(true),
+                .subcommand(
+                    Command::new("script")
+                        .about("Move script to a different group")
+                        .arg(
+                            Arg::new("script")
+                                .required(true)
+                                .help("The name of the script to move"),
+                        )
+                        .arg(
+                            Arg::new("group")
+                                .help("The name of the group to move the script to")
+                                .required(true),
+                        ),
                 ),
         );
     let matches = commands.clone().get_matches();
@@ -340,6 +407,11 @@ fn main() {
                     let force = sub_m.get_one::<bool>("force").unwrap_or(&false);
                     crate::commands::aliases::remove::remove_alias(&nymrc, &nym_db, name, *force);
                 }
+                Some(("script", sub_m)) => {
+                    let name = sub_m.get_one::<String>("name").unwrap();
+                    let force = sub_m.get_one::<bool>("force").unwrap_or(&false);
+                    crate::commands::scripts::remove::remove_script(&nymrc, &nym_db, name, *force);
+                }
                 _ => {
                     // Display help message
                     commands
@@ -352,9 +424,31 @@ fn main() {
             }
         }
         Some(("toggle", sub_m)) => {
-            // TODO: Add support for toggling groups, and scripts (when added)
-            let name = sub_m.get_one::<String>("name").unwrap();
-            crate::commands::aliases::edit::toggle_alias(&nymrc, &nym_db, name);
+            // TODO: Auto detect type of toggle and make group toggle a new command
+            match sub_m.subcommand() {
+                Some(("alias", sub_m)) => {
+                    let name = sub_m.get_one::<String>("name").unwrap();
+                    crate::commands::aliases::edit::toggle_alias(&nymrc, &nym_db, name);
+                }
+                // Some(("group", sub_m)) => {
+                //     // let name = sub_m.get_one::<String>("name").unwrap();
+                //     todo!("Yep I didn't finish this yet");
+                //     // crate::commands::groups::toggle::toggle_group(&nymrc, &nym_db, name);
+                // }
+                Some(("script", sub_m)) => {
+                    let name = sub_m.get_one::<String>("name").unwrap();
+                    crate::commands::scripts::edit::toggle_script(&nymrc, &nym_db, name);
+                }
+                _ => {
+                    // Display help message
+                    commands
+                        .find_subcommand("toggle")
+                        .unwrap()
+                        .clone()
+                        .print_help()
+                        .unwrap();
+                }
+            }
         }
         Some(("man", sub_m)) => {
             let name = sub_m.get_one::<String>("name").unwrap();
@@ -382,6 +476,13 @@ fn main() {
                     let new_name = sub_m.get_one::<String>("new_name").unwrap();
                     crate::commands::aliases::edit::rename(&nymrc, &nym_db, old_name, new_name);
                 }
+                Some(("script", sub_m)) => {
+                    let old_name = sub_m.get_one::<String>("old_name").unwrap();
+                    let new_name = sub_m.get_one::<String>("new_name").unwrap();
+                    crate::commands::scripts::edit::rename_script(
+                        &nymrc, &nym_db, old_name, new_name,
+                    );
+                }
                 _ => {
                     // Display help message
                     commands
@@ -394,9 +495,27 @@ fn main() {
             }
         }
         Some(("move", sub_m)) => {
-            let alias = sub_m.get_one::<String>("alias").unwrap();
-            let group = sub_m.get_one::<String>("group").unwrap();
-            crate::commands::aliases::edit::move_alias_group(&nymrc, &nym_db, alias, group);
+            match sub_m.subcommand() {
+                Some(("alias", sub_m)) => {
+                    let alias = sub_m.get_one::<String>("alias").unwrap();
+                    let group = sub_m.get_one::<String>("group").unwrap();
+                    crate::commands::aliases::edit::move_alias_group(&nymrc, &nym_db, alias, group);
+                }
+                Some(("script", sub_m)) => {
+                    let script = sub_m.get_one::<String>("script").unwrap();
+                    let group = sub_m.get_one::<String>("group").unwrap();
+                    crate::commands::scripts::edit::move_script(&nymrc, &nym_db, script, group);
+                }
+                _ => {
+                    // Display help message
+                    commands
+                        .find_subcommand("move")
+                        .unwrap()
+                        .clone()
+                        .print_help()
+                        .unwrap();
+                }
+            }
         }
         _ => {
             crate::manager::alias_manager(&nymrc, &nym_db);

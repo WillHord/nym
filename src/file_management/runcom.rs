@@ -46,26 +46,65 @@ pub fn read_aliases(runcom_file: &str) -> Result<Vec<Alias>, &'static str> {
     Ok(aliases)
 }
 
+fn pad_str(input: &str, pad_char: char, total_length: i32) -> String {
+    let input_length = input.len() as i32;
+    if input_length >= total_length {
+        return input.to_string();
+    }
+
+    let padding_needed = total_length - input_length;
+    let pad_left = padding_needed / 2;
+    let pad_right = padding_needed - pad_left;
+
+    let padded_string = format!(
+        "{}{}{}",
+        pad_char.to_string().repeat(pad_left as usize),
+        input,
+        pad_char.to_string().repeat(pad_right as usize)
+    );
+
+    padded_string
+}
+
 pub fn write_to_runcom(runcom_file: &str, groups: Vec<Group>) -> Result<(), &'static str> {
     let mut runcom = String::new();
-    runcom.push_str("###############Aliases###############\n");
 
-    // let parent_path = std::path::Path::new(runcom_file).parent().unwrap();
-    // let script_dir = parent_path.join("scripts");
+    runcom.push_str(&pad_str("", '#', 30));
+    runcom.push('\n');
+    runcom.push_str(&pad_str("Nym Runcom File", '#', 30));
+    runcom.push('\n');
+    runcom.push_str(&pad_str("", '#', 30));
+    runcom.push('\n');
 
     for group in groups {
-        runcom.push_str(&format!("\n##########{}##########\n", group.name));
-        for alias in group.aliases {
-            if alias.enabled {
-                // Replace double quotes with \" to escape them
-                let alias_command = alias.command.replace('\"', "\\\"");
-                runcom.push_str(&format!("alias {}=\"{}\"\n", alias.name, alias_command));
+        runcom.push_str(&format!("\n########## {} ##########\n", group.name));
+        if !group.aliases.is_empty() {
+            runcom.push_str("########## Aliases ##########\n");
+
+            for alias in group.aliases {
+                if alias.enabled {
+                    // Replace double quotes with \" to escape them
+                    let alias_command = alias.command.replace('\"', "\\\"");
+                    runcom.push_str(&format!("alias {}=\"{}\"\n", alias.name, alias_command));
+                }
             }
+            runcom.push('\n');
         }
 
-        for script in group.scripts {
-            if script.enabled {
-                runcom.push_str(&format!("export PATH=$HOME/{}:$PATH\n", script.path));
+        if !group.scripts.is_empty() {
+            runcom.push_str("########## Scripts ##########\n");
+            for script in group.scripts {
+                if script.enabled {
+                    let script_path = std::path::Path::new(runcom_file)
+                        .parent()
+                        .unwrap()
+                        .join("scripts")
+                        .join(&script.name);
+                    runcom.push_str(&format!(
+                        "export PATH={}:$PATH\n",
+                        script_path.to_str().unwrap()
+                    ));
+                }
             }
         }
     }

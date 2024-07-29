@@ -36,7 +36,20 @@ pub fn remove_script(rc_file: &str, db_file: &str, script_name: &str, force: boo
         std::process::exit(1);
     }
 
-    if let Err(_) = remove_script_from_database(&conn, script_name) {
+    if remove_script_from_database(&conn, &script.name).is_err() {
+        error!("Could not remove script from database");
+        return;
+    }
+
+    if std::fs::remove_dir_all(
+        std::path::Path::new(&script.path)
+            .parent()
+            .unwrap()
+            .to_str()
+            .unwrap(),
+    )
+    .is_err()
+    {
         error!("Could not remove script");
         return;
     }
