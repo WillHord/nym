@@ -451,6 +451,7 @@ fn main() {
             }
         }
         Some(("man", sub_m)) => {
+            // TODO: Auto detect type item
             let name = sub_m.get_one::<String>("name").unwrap();
             crate::commands::aliases::list::alias_manual(&nym_db, name);
         }

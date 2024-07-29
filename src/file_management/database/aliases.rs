@@ -96,6 +96,7 @@ pub fn update_alias(
 #[cfg(test)]
 mod tests {
     use crate::file_management::database::groups::{get_group_nameids, get_groups};
+    use crate::file_management::Group;
 
     use super::super::super::Alias;
     use super::super::setupdb;
