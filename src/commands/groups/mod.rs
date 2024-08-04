@@ -7,9 +7,6 @@ use crate::error;
 use crate::file_management::database::groups::get_group_nameids;
 use crate::file_management::{database::setupdb, Group};
 
-use console::style;
-use inquire::Confirm;
-
 pub fn fuzzy_get_group(db_path: &str, name: &str) -> Option<Group> {
     // A function to get an alias by name, but also get the closest match if the name doesn't exist
     let conn = match setupdb(db_path) {

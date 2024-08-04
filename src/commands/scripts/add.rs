@@ -1,5 +1,3 @@
-use console::style;
-
 use crate::{
     error,
     file_management::{

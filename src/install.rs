@@ -3,13 +3,8 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use console::style;
-use inquire::Confirm;
 
-use crate::error;
-use crate::exit;
-use crate::helpers;
-use crate::success;
-use crate::warning;
+use crate::{error, exit, helpers, success, warning};
 
 fn check_installed(shell_profile: &str) -> bool {
     // Check if the program is already installed

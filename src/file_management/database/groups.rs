@@ -134,17 +134,17 @@ pub fn get_group_by_name(conn: &Connection, name: &str) -> Result<Group, &'stati
     }
 }
 
-pub fn remove_group(conn: &Connection, name: &str) -> Result<(), &'static str> {
+pub fn remove_group(conn: &Connection, name: &str) -> Result<(), String> {
     // Remove group
     // If group exists move aliases to uncategorized
     // Do not allow deleting uncategorized (id 1)
     if name == "uncategorized" {
-        return Err("Cannot delete uncategorized group");
+        return Err("Cannot delete uncategorized group".to_string());
     }
     let group = match get_group_by_name(conn, name) {
         Ok(val) => val,
         Err(_) => {
-            return Err("Could not find group to remove");
+            return Err("Could not find group to remove".to_string());
         }
     };
 
@@ -153,12 +153,12 @@ pub fn remove_group(conn: &Connection, name: &str) -> Result<(), &'static str> {
         params![group.id],
     ) {
         Ok(val) => val,
-        Err(_) => return Err("Error moving aliases to uncategorized"),
+        Err(_) => return Err("Error moving aliases to uncategorized".to_string()),
     };
 
-    match conn.execute("DELETE FROM groups WHERE id == (?1)", params![group.id]) {
+    match conn.execute("DELETE FROM groups WHERE id == (?1)", [group.id]) {
         Ok(_) => Ok(()),
-        Err(_) => Err("Error deleting group"),
+        Err(err) => Err(format!("Error deleting string: {}", err)),
     }
 }
 

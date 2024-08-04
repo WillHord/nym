@@ -25,3 +25,5 @@ strsim = "0.11.1"
 regex = "1.10.5"
 fancy-regex = "0.13.0"
 rusqlite = { version = "0.31.0", features = ["bundled"] }
+indexmap = "2.3.0"
+crossterm = "0.28.1"

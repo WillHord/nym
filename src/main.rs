@@ -519,7 +519,8 @@ fn main() {
             }
         }
         _ => {
-            crate::manager::alias_manager(&nymrc, &nym_db);
+            crate::manager::start_manager(&nymrc, &nym_db);
+            // crate::manager::alias_manager(&nymrc, &nym_db);
         }
     }
 }

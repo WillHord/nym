@@ -11,7 +11,6 @@ use crate::{
     success,
 };
 use console::style;
-use inquire::Confirm;
 
 // TODO: abstract out connection and fuzzy get alias to private function
 

@@ -1,6 +1,6 @@
 macro_rules! yesno {
     ($message: expr) => {
-        Confirm::new(format!("{} {}", $message, "[y/n]").as_str()).prompt()
+        inquire::Confirm::new(format!("{} {}", $message, "[y/n]").as_str()).prompt()
     };
 }
 

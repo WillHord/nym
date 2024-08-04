@@ -1,5 +1,4 @@
 use console::style;
-use inquire::Confirm;
 
 use crate::{
     error,
@@ -42,11 +41,15 @@ pub fn remove_group(runcom_file: &str, db_file: &str, group_name: &str, force: b
     }
 
     match remove_group_database(&conn, &group.name) {
-        Ok(_) => success!("Group successfully deleted"),
-        Err(_) => {
+        Ok(_) => success!(format!(
+            "Group {} successfully deleted",
+            style(group.name).bold()
+        )),
+        Err(err) => {
             error!(format!(
-                "could not delete group {}",
-                style(group.name).bold()
+                "could not delete group {} - {}",
+                style(group.name).bold(),
+                err
             ));
             return;
         }

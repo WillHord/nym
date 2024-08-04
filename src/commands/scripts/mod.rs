@@ -2,7 +2,6 @@ use crate::file_management::{
     database::{db_conn, scripts::get_all_scripts},
     Script,
 };
-use inquire::Confirm;
 
 pub mod add;
 pub mod edit;

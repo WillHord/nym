@@ -10,7 +10,6 @@ use crate::{
 };
 
 use console::style;
-use inquire::Confirm;
 
 fn get_script(db_file: &str, script_name: &str) -> Result<Script, &'static str> {
     let script = match fuzzy_get_script(db_file, script_name) {

@@ -4,15 +4,13 @@ pub mod list;
 pub mod remove;
 
 use crate::{
-    helpers::messages::error,
     file_management::{
         database::{aliases::get_all_aliases, setupdb},
         Alias,
     },
+    helpers::messages::error,
 };
-use console::style;
 use fancy_regex::Regex;
-use inquire::Confirm;
 
 fn confirm_alias(alias: &Alias) -> bool {
     // Ask for confirmation

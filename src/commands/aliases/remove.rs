@@ -4,7 +4,6 @@ use crate::file_management::database::setupdb;
 use crate::file_management::update_runcom;
 use crate::{error, success};
 use console::style;
-use inquire::Confirm;
 
 pub fn remove_alias(runcom_file: &str, db_file: &str, alias_name: &str, force: bool) {
     let conn = match setupdb(db_file) {

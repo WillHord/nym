@@ -7,8 +7,6 @@ use crate::{
     },
     success,
 };
-use console::style;
-use inquire::Confirm;
 
 pub fn remove_script(rc_file: &str, db_file: &str, script_name: &str, force: bool) {
     let conn = db_conn(db_file);

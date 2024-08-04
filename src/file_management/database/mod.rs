@@ -3,7 +3,6 @@ pub mod groups;
 pub mod scripts;
 
 use crate::error;
-use console::style;
 use rusqlite::{params, Connection, Result};
 
 pub fn setupdb(db_path: &str) -> Result<Connection> {

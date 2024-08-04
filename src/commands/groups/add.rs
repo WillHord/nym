@@ -12,17 +12,13 @@ use crate::{
 pub fn add_group(db_file: &str, group_name: &str) {
     let conn = db_conn(db_file);
 
-    // TODO: Chagne this to an if statemnet
-    let _ = match get_group_by_name(&conn, group_name) {
-        Ok(_) => {
-            error!(format!(
-                "Group with name {} already exists",
-                style(group_name).bold()
-            ));
-            return;
-        }
-        Err(_) => true,
-    };
+    if get_group_by_name(&conn, group_name).is_ok() {
+        error!(format!(
+            "Group with name {} already exists",
+            style(group_name).bold()
+        ));
+        return;
+    }
 
     create_group(&conn, group_name);
     success!(format!("Group {} created successfully", group_name));
