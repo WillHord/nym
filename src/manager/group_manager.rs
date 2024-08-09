@@ -159,6 +159,15 @@ pub fn bulk_toggle_group(runcom_file: &str, db_file: &str) {
             {
                 crate::commands::aliases::edit::toggle_alias(runcom_file, db_file, &alias.name)
             }
+            for script in groups
+                .iter()
+                .find(|g| g.name == group_name)
+                .unwrap()
+                .scripts
+                .iter()
+            {
+                crate::commands::scripts::edit::toggle_script(runcom_file, db_file, &script.name)
+            }
         } else {
             for alias in groups
                 .iter()
@@ -169,6 +178,21 @@ pub fn bulk_toggle_group(runcom_file: &str, db_file: &str) {
             {
                 if !alias.enabled {
                     crate::commands::aliases::edit::toggle_alias(runcom_file, db_file, &alias.name)
+                }
+            }
+            for script in groups
+                .iter()
+                .find(|g| g.name == group_name)
+                .unwrap()
+                .scripts
+                .iter()
+            {
+                if !script.enabled {
+                    crate::commands::scripts::edit::toggle_script(
+                        runcom_file,
+                        db_file,
+                        &script.name,
+                    )
                 }
             }
         }

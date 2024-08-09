@@ -23,10 +23,10 @@ pub fn bulk_toggle_scripts(runcom_file: &str, db_file: &str) {
     }
 }
 
-pub fn add_script(runcom_file: &str, db_file: &str) {
-    // TODO: Implement this - auto complete script path
-    todo!()
-}
+// pub fn add_script(runcom_file: &str, db_file: &str) {
+//     // TODO: Implement this - auto complete script path
+//     todo!()
+// }
 
 pub fn bulk_remove_scripts(runcom_file: &str, db_file: &str) {
     let conn = crate::file_management::database::db_conn(db_file);

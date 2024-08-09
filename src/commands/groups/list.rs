@@ -17,7 +17,7 @@ pub fn list_all(db_file: &str) {
     let groups = get_groups(&conn);
 
     for group in groups {
-        println!("{}", style(group.name).bold().underlined());
+        println!("{}:", style(group.name).bold().underlined());
         if !group.aliases.is_empty() {
             println!("    Aliases:");
             for alias in group.aliases {

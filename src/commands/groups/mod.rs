@@ -2,9 +2,10 @@ pub mod add;
 pub mod list;
 pub mod remove;
 pub mod rename;
+pub mod toggle;
 
 use crate::error;
-use crate::file_management::database::groups::get_group_nameids;
+use crate::file_management::database::groups::get_groups;
 use crate::file_management::{database::setupdb, Group};
 
 pub fn fuzzy_get_group(db_path: &str, name: &str) -> Option<Group> {
@@ -16,7 +17,7 @@ pub fn fuzzy_get_group(db_path: &str, name: &str) -> Option<Group> {
             return None;
         }
     };
-    let groups = get_group_nameids(&conn).unwrap();
+    let groups = get_groups(&conn);
     let mut closest_match: Option<Group> = None;
     let mut closest_distance = usize::MAX;
 
