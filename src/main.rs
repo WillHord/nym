@@ -34,61 +34,23 @@ fn main() {
             Command::new("add")
                 .about("Create a new alias or group")
                 .subcommand(
-                    Command::new("group").about("Create a new group").arg(
-                        Arg::new("name")
-                            .help("The name of the group")
-                            .required(true),
-                    ),
+                    Command::new("group")
+                        .about("Create a new group")
+                        .arg(arg!(<name> "The name of the group")),
                 )
                 .subcommand(
                     Command::new("alias")
                         .about("Create a new alias")
-                        .arg(
-                            Arg::new("command")
-                                .help("The command to run when the alias is called")
-                                .required(true),
-                        )
-                        .arg(
-                            Arg::new("description")
-                                .short('d')
-                                .long("description")
-                                .value_name("DESCRIPTION")
-                                .help("A description of the aliase")
-                                .required(false),
-                        )
-                        .arg(
-                            Arg::new("group")
-                                .short('g')
-                                .long("group")
-                                .value_name("GROUP")
-                                .help("The group to add the alias to")
-                                .required(false),
-                        ),
+                        .arg(arg!(<command> "The command to run when the alias is called"))
+                        .arg(arg!(-d --description [DESCRIPTION] "A description of the aliase"))
+                        .arg(arg!(-g --group [GROUP] "The group to add the alias to")),
                 )
                 .subcommand(
                     Command::new("script")
                         .about("Add a new script")
-                        .arg(
-                            Arg::new("path")
-                                .help("The path to the script")
-                                .required(true),
-                        )
-                        .arg(
-                            Arg::new("description")
-                                .short('d')
-                                .long("description")
-                                .value_name("DESCRIPTION")
-                                .help("A description of the script")
-                                .required(false),
-                        )
-                        .arg(
-                            Arg::new("group")
-                                .short('g')
-                                .long("group")
-                                .value_name("GROUP")
-                                .help("The group to add the script to")
-                                .required(false),
-                        ),
+                        .arg(arg!(<path> "The path to the script"))
+                        .arg(arg!(-d --description [DESCRIPTION] "A description of the script"))
+                        .arg(arg!(-g --group [GROUP] "The group to add the script to")),
                 ),
         )
         .subcommand(
@@ -100,57 +62,31 @@ fn main() {
         .subcommand(
             Command::new("rename")
                 .about("Rename an alias or group")
-                .arg(
-                    Arg::new("old_name")
-                        .help("Name of item to rename")
-                        .required(true),
-                )
-                .arg(Arg::new("new_name").help("New name of item").required(true)),
+                .arg(arg!(<old_name> "Name of item to rename"))
+                .arg(arg!(<new_name> "New Name of item")),
         )
         .subcommand(
-            Command::new("toggle").about("Toggle an alias by name").arg(
-                Arg::new("name")
-                    .help("The name of the item to toggle")
-                    .required(true),
-            ),
+            Command::new("toggle")
+                .about("Toggle an alias by name")
+                .arg(arg!(<name> "The name of the item to toggle")),
         )
-        .subcommand(
-            Command::new("install").about("Install Nym").arg(
-                Arg::new("shell_profile")
-                    .help("The shell profile file to install Nym. E.g. .bashrc, .zshrc")
-                    .required(true),
-            ),
-        )
-        .subcommand(
-            Command::new("uninstall").about("Uninstall Nym").arg(
-                Arg::new("shell_profile")
-                    .help("The shell profile file to uninstall Nym. E.g. .bashrc, .zshrc")
-                    .required(true),
-            ),
-        )
+        .subcommand(Command::new("install").about("Install Nym").arg(
+            arg!(<shell_profile> "The shell profile file to install Nym. E.g. .bashrc, .zshrc"),
+        ))
+        .subcommand(Command::new("uninstall").about("Uninstall Nym").arg(
+            arg!(<shell_profile> "The shell profile file to uninstall Nym. E.g. .bashrc, .zshrc"),
+        ))
         .subcommand(
             Command::new("man")
                 .about("Open up description of alias")
-                .arg(
-                    Arg::new("name")
-                        .required(true)
-                        .help("The name of the alias to view description of"),
-                ),
+                .arg(arg!(<name> "The name of the alias to view description of")),
         )
         .subcommand(
             // TODO: Allow creating a new group while moving "move -n group_name"
             Command::new("move")
                 .about("Move alias or script to a different group")
-                .arg(
-                    Arg::new("name")
-                        .help("The name of the item to toggle")
-                        .required(true),
-                )
-                .arg(
-                    Arg::new("group")
-                        .help("The name of the group to move the item to")
-                        .required(true),
-                ),
+                .arg(arg!(<name> "The name of the item to toggle"))
+                .arg(arg!(<group> "The name of the group to move the item to")),
         );
     let matches = commands.clone().get_matches();
 
