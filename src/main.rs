@@ -34,9 +34,11 @@ fn main() {
             Command::new("add")
                 .about("Create a new alias or group")
                 .subcommand(
-                    Command::new("group")
-                        .about("Create a new group")
-                        .arg(arg!(<name> "The name of the group")),
+                    Command::new("group").about("Create a new group").arg(
+                        arg!(<name> "The name of the group")
+                            .num_args(1..)
+                            .allow_hyphen_values(true),
+                    ),
                 )
                 .subcommand(
                     Command::new("alias")
@@ -145,8 +147,12 @@ fn main() {
         Some(("add", sub_m)) => {
             match sub_m.subcommand() {
                 Some(("group", sub_m)) => {
-                    let name = sub_m.get_one::<String>("name").unwrap();
-                    crate::commands::groups::add::add_group(&nym_db, name);
+                    let name: Vec<String> = sub_m
+                        .get_many::<String>("name")
+                        .unwrap()
+                        .map(|s| s.to_string())
+                        .collect();
+                    crate::commands::groups::add::add_group(&nym_db, &name.join(" "));
                 }
                 Some(("alias", sub_m)) => {
                     let command_vector: Vec<String> = sub_m

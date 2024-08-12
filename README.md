@@ -154,13 +154,14 @@ To build and install nym follow these simple steps.
 
 - [x] Alias manager interface (allow for user to toggle, add, and delete all within one command)
 - [x] Rename command for aliases
-- [ ] Manage Scripts as well as Aliases
+- [x] Manage Scripts as well as Aliases
+- [x] Aliases groups (enable sorting aliases and toggling in groups)
+- [ ] Allow aliases to be executed in a specific order (allows for aliases based on aliases)
 - [ ] Better installation (brew, cargo, packman, etc.)
 - [ ] Test on other shell environments (other than bash, and zsh)
 - [ ] Download aliases from web (github repos)
 - [ ] Manage more parts of shell env
   - [ ] Api keys, secrets, etc
-- [ ] Aliases groups (enable sorting aliases and toggling in groups)
 
 See the [open issues](https://github.com/WillHord/nym/issues) for a full list of proposed features and known issues.
 
