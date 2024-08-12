@@ -1,4 +1,7 @@
-use crate::file_management::database::{db_conn, scripts::get_all_scripts};
+use crate::{
+    file_management::database::{db_conn, scripts::get_all_scripts},
+    warning,
+};
 
 use super::fuzzy_get_script;
 
@@ -8,7 +11,7 @@ pub fn list_scripts(db_file: &str) {
     let scripts = get_all_scripts(&conn);
 
     if scripts.is_empty() {
-        println!("No scripts found");
+        warning!("No scripts found");
         return;
     }
 
@@ -21,7 +24,6 @@ pub fn list_scripts(db_file: &str) {
     }
 }
 
-#[allow(dead_code)]
 pub fn script_manual(db_file: &str, name: &str) {
     let script = fuzzy_get_script(db_file, name);
     match script {

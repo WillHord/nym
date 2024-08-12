@@ -19,16 +19,28 @@ pub fn add_alias(
     description: &str,
     group_id: i32,
 ) {
-    let alias_command = match validate_alias(command) {
+    // Split command by = (name=value)
+    let alias_command = command.trim_start_matches("alias ");
+    let split_command: Vec<&str> = alias_command.split('=').collect();
+    let name = split_command[0];
+    let value = split_command.last().copied().unwrap();
+
+    // surround value with quotes if not already existing
+    let command = if value.starts_with('"') && value.ends_with('"')
+        || value.starts_with('\'') && value.ends_with('\'')
+    {
+        format!("{}={}", name, value)
+    } else {
+        format!("{}=\"{}\"", name, value)
+    };
+
+    let alias_command = match validate_alias(&command) {
         true => command.to_string(),
         false => {
             error!("Command must be in format alias_name=\"command\"");
             return;
         }
     };
-
-    let alias_command = alias_command.trim_start_matches("alias ");
-    let name: &str = alias_command.split('=').collect::<Vec<&str>>()[0];
 
     let conn = match setupdb(db_file) {
         Ok(conn) => conn,

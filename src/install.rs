@@ -86,7 +86,7 @@ pub fn install(shell_profile: &str) {
         .append(true)
         .open(shell_profile)
         .unwrap();
-    let to_write: String = format!("\n# Nym Alias File:\n{}\n", source_command);
+    let to_write: String = format!("\n# Nymrc File:\n{}\n", source_command);
 
     // Check if the source command is already in the shell profile file
     let mut contents = String::new();
@@ -154,7 +154,7 @@ pub fn uninstall(shell_profile: &str) {
 
     // Remove source command from shell profile file
     let source_command: String = format!(
-        "# Nym Alias File:\nsource {}",
+        "# Nymrc File:\nsource {}",
         nymrc.into_os_string().into_string().unwrap()
     );
 

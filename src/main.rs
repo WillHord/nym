@@ -9,7 +9,7 @@ use console::style;
 
 fn main() {
     let commands = Command::new("nym")
-        .version("0.1.2")
+        .version("0.1.3")
         .author("Will Hord")
         .about("A simple alias manager")
         .subcommand(
@@ -18,7 +18,7 @@ fn main() {
                 .subcommand(Command::new("groups").about("List all groups"))
                 // TODO: Add command to list everything in a group
                 .subcommand(
-                    Command::new("alias").about("List all aliases").arg(
+                    Command::new("aliases").about("List all aliases").arg(
                         Arg::new("disabled")
                             .long("disabled")
                             .short('d')
@@ -41,7 +41,14 @@ fn main() {
                 .subcommand(
                     Command::new("alias")
                         .about("Create a new alias")
-                        .arg(arg!(<command> "The command to run when the alias is called"))
+                        .arg(
+                            // arg!(<command> "The command to run when the alias is called")
+                            Arg::new("command")
+                                .help("The command to run when the alias is called")
+                                .required(true)
+                                .num_args(1..)
+                                .allow_hyphen_values(true),
+                        )
                         .arg(arg!(-d --description [DESCRIPTION] "A description of the aliase"))
                         .arg(arg!(-g --group [GROUP] "The group to add the alias to")),
                 )
@@ -119,19 +126,16 @@ fn main() {
     match matches.subcommand() {
         Some(("list", sub_m)) => match sub_m.subcommand() {
             // TODO: Allow listing specifc group(s) and just aliases or scripts in the group
-            Some(("group", _)) => {
-                println!("Listing groups");
+            Some(("groups", _)) => {
                 crate::commands::groups::list::list_groups(&nym_db);
             }
-            Some(("alias", sub_m)) => {
-                println!("Listing aliases");
+            Some(("aliases", sub_m)) => {
                 crate::commands::aliases::list::list_aliases(
                     &nym_db,
                     *sub_m.get_one("disabled").unwrap_or(&false),
                 );
             }
             Some(("scripts", _)) => {
-                println!("Listing scripts");
                 crate::commands::scripts::list::list_scripts(&nym_db);
             }
             _ => {
@@ -141,13 +145,18 @@ fn main() {
         Some(("add", sub_m)) => {
             match sub_m.subcommand() {
                 Some(("group", sub_m)) => {
-                    println!("Adding group");
                     let name = sub_m.get_one::<String>("name").unwrap();
                     crate::commands::groups::add::add_group(&nym_db, name);
                 }
                 Some(("alias", sub_m)) => {
-                    println!("Adding alias");
-                    let command = sub_m.get_one::<String>("command").unwrap().to_string();
+                    let command_vector: Vec<String> = sub_m
+                        .get_many::<String>("command")
+                        .unwrap()
+                        .map(|s| s.to_string())
+                        .collect();
+
+                    let command = command_vector.join(" ");
+
                     let description = sub_m
                         .get_one::<String>("description")
                         .unwrap_or(&"".to_string())
@@ -174,7 +183,6 @@ fn main() {
                     );
                 }
                 Some(("script", sub_m)) => {
-                    println!("Adding script");
                     let path = sub_m.get_one::<String>("path").unwrap().to_string();
                     let description = sub_m
                         .get_one::<String>("description")
@@ -255,15 +263,12 @@ fn main() {
 
             match crate::commands::get_item(&nym_db, name, true) {
                 Some(crate::commands::Item::Alias(alias)) => {
-                    println!("Toggling alias");
                     crate::commands::aliases::edit::toggle_alias(&nymrc, &nym_db, &alias.name)
                 }
                 Some(crate::commands::Item::Group(group)) => {
-                    println!("Toggling group");
                     crate::commands::groups::toggle::toggle_group(&nymrc, &nym_db, &group.name)
                 }
                 Some(crate::commands::Item::Script(script)) => {
-                    println!("Toggling script");
                     crate::commands::scripts::edit::toggle_script(&nymrc, &nym_db, &script.name)
                 }
                 None => {
