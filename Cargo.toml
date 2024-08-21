@@ -1,6 +1,6 @@
 [package]
 name = "nym"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Will Hord<will@willhord.dev>"]
 categories = ["command-line-utilities"]
 keywords = ["cli", "shell", "tool", "utility"]

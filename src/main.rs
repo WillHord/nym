@@ -4,31 +4,39 @@ mod helpers;
 mod install;
 mod manager;
 
-use clap::{arg, Arg, ArgAction, Command};
+use clap::{arg, ArgAction, Command};
 use console::style;
 
 fn main() {
     let commands = Command::new("nym")
-        .version("0.1.3")
+        .version("0.1.4")
         .author("Will Hord")
         .about("A simple alias manager")
         .subcommand(
             Command::new("list")
                 .about("List all aliases")
-                .subcommand(Command::new("groups").about("List all groups"))
+                .aliases(["ls", "l"])
+                .subcommand(
+                    Command::new("groups")
+                        .about("List all groups")
+                        .aliases(["group", "g"]),
+                )
                 // TODO: Add command to list everything in a group
                 .subcommand(
-                    Command::new("aliases").about("List all aliases").arg(
-                        Arg::new("disabled")
-                            .long("disabled")
-                            .short('d')
-                            .help("List disabled aliases")
-                            .action(ArgAction::SetTrue),
-                    ),
+                    Command::new("aliases")
+                        .about("List all aliases")
+                        .aliases(["alias", "a"])
+                        .arg(
+                            arg!(-d --disabled "List disabled aliases").action(ArgAction::SetTrue),
+                        ),
                     // TODO: Add flags for listing by group
                     // TODO: Change disabled to enabled and allow true or false to be passed
                 )
-                .subcommand(Command::new("scripts").about("List all scripts")),
+                .subcommand(
+                    Command::new("scripts")
+                        .about("List all scripts")
+                        .aliases(["script", "s"]),
+                ),
         )
         .subcommand(
             Command::new("add")
@@ -44,10 +52,7 @@ fn main() {
                     Command::new("alias")
                         .about("Create a new alias")
                         .arg(
-                            // arg!(<command> "The command to run when the alias is called")
-                            Arg::new("command")
-                                .help("The command to run when the alias is called")
-                                .required(true)
+                            arg!(<command> "The command to run when the alias is called")
                                 .num_args(1..)
                                 .allow_hyphen_values(true),
                         )
@@ -63,8 +68,10 @@ fn main() {
                 ),
         )
         .subcommand(
+            // TODO: Allow removing multiple at a time (only if it is not a mix of groups and other items)
             Command::new("remove")
                 .about("Remove an alias or group by name")
+                .aliases(["rm"])
                 .arg(arg!(<name> "The name of the item to remove"))
                 .arg(arg!(-f --force "Force remove item")),
         )
@@ -94,6 +101,7 @@ fn main() {
             // TODO: Allow creating a new group while moving "move -n group_name"
             Command::new("move")
                 .about("Move alias or script to a different group")
+                .aliases(["mv"])
                 .arg(arg!(<name> "The name of the item to toggle"))
                 .arg(arg!(<group> "The name of the group to move the item to")),
         );
