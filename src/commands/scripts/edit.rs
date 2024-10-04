@@ -98,7 +98,14 @@ pub fn rename_script(runcom_file: &str, db_file: &str, old_name: &str, new_name:
         .to_str()
         .unwrap();
 
-    let script_ext = script_file.split('.').collect::<Vec<&str>>()[1];
+    // FIX: This is a temp fix for allowing files with no extension
+    let script_ext_vec = script_file.split('.').collect::<Vec<&str>>();
+    let script_ext = if script_ext_vec.len() > 2 {
+        script_ext_vec[1]
+    } else {
+        ""
+    };
+
     let new_script_name = if script_ext.is_empty() {
         new_name.to_string()
     } else {
