@@ -33,6 +33,8 @@ fn main() {
                     // TODO: Change disabled to enabled and allow true or false to be passed
                 )
                 .subcommand(
+                    // TODO: Add ability to symlink script
+                    // TODO: Add Ability to copy parent dir of script (eg if python script uses venv to run script)
                     Command::new("scripts")
                         .about("List all scripts")
                         .aliases(["script", "s"]),
@@ -64,7 +66,7 @@ fn main() {
                         .about("Add a new script")
                         .arg(arg!(<path> "The path to the script"))
                         .arg(arg!(-d --description [DESCRIPTION] "A description of the script"))
-                        .arg(arg!(-g --group [GROUP] "The group to add the script to")),
+                        .arg(arg!(-g --group [GROUP] "The group to add the script to")), // .arg(arg!(-ln --link [LINK] "Use symlink instead of copying script")),
                 ),
         )
         .subcommand(
@@ -98,12 +100,20 @@ fn main() {
                 .arg(arg!(<name> "The name of the alias to view description of")),
         )
         .subcommand(
+            Command::new("update")
+                .about("Update alias or script")
+                .arg(arg!(<name> "name of item to update"))
+                .arg(arg!(-n --new <NEW_ITEM> "Either the new command for the alias or path to updated script"))
+            ,
+        )
+        .subcommand(
             // TODO: Allow creating a new group while moving "move -n group_name"
             Command::new("move")
                 .about("Move alias or script to a different group")
                 .aliases(["mv"])
                 .arg(arg!(<name> "The name of the item to toggle"))
-                .arg(arg!(<group> "The name of the group to move the item to")),
+                .arg(arg!(<group> "The name of the group to move the item to").required(false))
+                .arg(arg!(-n --new_group <NEW_GROUP> "Create a new group to add alias or script to")),
         );
     let matches = commands.clone().get_matches();
 
@@ -168,6 +178,8 @@ fn main() {
                         .unwrap()
                         .map(|s| s.to_string())
                         .collect();
+
+                    println!("command vector: {:?}", command_vector);
 
                     let command = command_vector.join(" ");
 
@@ -354,6 +366,11 @@ fn main() {
             let name = sub_m.get_one::<String>("name").unwrap();
             let group = sub_m.get_one::<String>("group").unwrap();
 
+            let new_group = sub_m
+                .get_one::<String>("new_group")
+                .unwrap_or(&"".to_string())
+                .to_string();
+
             match crate::commands::get_item(&nym_db, name, false) {
                 Some(crate::commands::Item::Alias(alias)) => {
                     crate::commands::aliases::edit::move_alias_group(
@@ -361,6 +378,11 @@ fn main() {
                         &nym_db,
                         &alias.name,
                         group,
+                        if new_group.is_empty() {
+                            None 
+                        } else {
+                           Some(&new_group) 
+                        }
                     );
                 }
                 Some(crate::commands::Item::Script(script)) => {
@@ -370,6 +392,38 @@ fn main() {
                         &script.name,
                         group,
                     );
+                }
+                _ => {
+                    error!(format!(
+                        "Item not found. Try using {} to find the correct item",
+                        style("`nym list`").bold()
+                    ))
+                }
+            }
+        }
+        Some(("update", sub_m)) => {
+            let name = sub_m.get_one::<String>("name").unwrap();
+            let updated_item = sub_m
+                .get_one::<String>("new")
+                .unwrap_or(&"".to_string())
+                .to_string();
+
+            match crate::commands::get_item(&nym_db, name, false) {
+                Some(crate::commands::Item::Alias(alias)) => {
+                    println!("Found alias {}", alias.name);
+                }
+                Some(crate::commands::Item::Script(script)) => {
+                    crate::commands::scripts::update::update_script(
+                        &nym_db,
+                        &nymrc,
+                        &script.name,
+                        if updated_item.is_empty() {
+                            None
+                        } else {
+                            Some(&updated_item)
+                        },
+                    );
+                    println!("Found script {}", script.name);
                 }
                 _ => {
                     error!(format!(

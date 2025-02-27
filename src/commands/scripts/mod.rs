@@ -7,6 +7,7 @@ pub mod add;
 pub mod edit;
 pub mod list;
 pub mod remove;
+pub mod update;
 
 pub fn confirm_script(script: &Script) -> bool {
     // Ask for confirmation

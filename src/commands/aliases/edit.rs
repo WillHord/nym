@@ -102,7 +102,7 @@ pub fn toggle_alias(runcom_file: &str, db_file: &str, alias_name: &str) {
     );
 }
 
-pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, group_name: &str) {
+pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, group_name: &str, new_group: Option<&str>) {
     let mut alias = match get_alias(db_file, alias_name) {
         Ok(alias) => alias,
         Err(e) => {

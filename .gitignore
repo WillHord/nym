@@ -20,4 +20,5 @@ Cargo.lock
 
 .aliases
 .aliases.json
+tests
 

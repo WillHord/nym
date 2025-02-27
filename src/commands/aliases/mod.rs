@@ -2,6 +2,7 @@ pub mod add;
 pub mod edit;
 pub mod list;
 pub mod remove;
+pub mod update;
 
 use crate::{
     file_management::{
@@ -18,8 +19,11 @@ fn confirm_alias(alias: &Alias) -> bool {
 }
 
 pub fn validate_alias(alias: &str) -> bool {
+    // TODO: Add warning when not using single quotes
+    // single quotes prevent commands within the alias to be executed
     let pattern = r#"(?:alias\s+)?(\w+)=([\'"])((?:\\.|(?!\2).)*)\2"#;
     let re = Regex::new(pattern).unwrap();
+    println!("{}", alias);
 
     match re.is_match(alias) {
         Ok(value) => value,
