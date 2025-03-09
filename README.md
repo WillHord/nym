@@ -69,17 +69,33 @@ To build and install nym follow these simple steps.
 
 ### Installation
 
+#### Method 1: Install via Cargo (Recommended)
+
+1. Install latest commit of nym via cargo
+   ```bash
+   cargo install --git https://github.com/WillHord/nym.git
+   ```
+
+1. Run install command with shell profile
+   ```bash
+    nym install <path_to_shell_profile>
+   ```
+
+
+#### Method 2: Manual installation
+
 1. Clone the repo
 
    ```sh
    git clone https://github.com/WillHord/nym.git
+   cd nym
    ```
 
 2. Build nym and move binary to bin
 
    ```sh
    cargo build --release
-   cp target/release/nym /usr/local/bin/nym
+   sudo install target/release/nym /usr/local/bin
    ```
 
 3. Run install command with shell profile
