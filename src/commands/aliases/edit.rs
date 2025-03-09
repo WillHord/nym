@@ -102,7 +102,7 @@ pub fn toggle_alias(runcom_file: &str, db_file: &str, alias_name: &str) {
     );
 }
 
-pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, group_name: &str, new_group: Option<&str>) {
+pub fn move_alias_group(runcom_file: &str, db_file: &str, alias_name: &str, group_name: &str, _new_group: Option<&str>) {
     let mut alias = match get_alias(db_file, alias_name) {
         Ok(alias) => alias,
         Err(e) => {
@@ -282,7 +282,7 @@ mod tests {
         );
 
         create_group(&conn, "test_group_1");
-        move_alias_group(rc_path, db_path, "test1", "test_group_1");
+        move_alias_group(rc_path, db_path, "test1", "test_group_1", None);
 
         let truth = vec![Alias {
             name: "test1".to_string(),

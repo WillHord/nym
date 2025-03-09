@@ -51,10 +51,17 @@ pub fn list_all(db_file: &str) {
         if !group.scripts.is_empty() {
             println!("    Scripts:");
             for script in group.scripts {
+                // TODO: Save name with extension for easier printing
+                let script_file = std::path::Path::new(&script.path)
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap();
+
                 if script.enabled {
-                    println!("\t✅ {}", style(script.name).green());
+                    println!("\t✅ {}", style(script_file).green());
                 } else {
-                    println!("\t❌ {}", style(script.name).red());
+                    println!("\t❌ {}", style(script_file).red());
                 }
             }
         }

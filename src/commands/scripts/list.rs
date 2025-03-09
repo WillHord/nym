@@ -16,10 +16,17 @@ pub fn list_scripts(db_file: &str) {
     }
 
     for script in scripts {
+        // TODO: Save name with extension for easier printing
+        let script_file = std::path::Path::new(&script.path)
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap();
+
         if script.enabled {
-            println!("✅ {}", script.name);
+            println!("✅ {}", script_file);
         } else {
-            println!("❌ {}", script.name);
+            println!("❌ {}", script_file);
         }
     }
 }

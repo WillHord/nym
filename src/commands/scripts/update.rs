@@ -1,18 +1,17 @@
 use crate::{
     error,
-    file_management::{
-        database::{
+    file_management::database::{
             db_conn,
-            scripts::{add_script as add_script_to_database, get_script_by_name},
+            scripts::get_script_by_name,
         },
-        update_runcom, Script,
-    },
     helpers::questions::get_filepath,
     success,
 };
 
+#[allow(dead_code, unreachable_code, unused_variables)]
 pub fn update_script(db_file: &str, rc_file: &str, script_name: &str, update_path: Option<&str>) {
     // TODO: Add execution check - if not executable add option to change permissions
+    todo!();
     let script_path = match update_path {
         Some(str) => str,
         None => &get_filepath!("Updated script filepath").unwrap(),
@@ -54,7 +53,7 @@ pub fn update_script(db_file: &str, rc_file: &str, script_name: &str, update_pat
         script_path,
         scripts_dir
             .join(script_name_no_ext)
-            .join(script_name.clone()),
+            .join(script_name),
     )
     .is_err()
     {
