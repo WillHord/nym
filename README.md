@@ -49,7 +49,7 @@
 
 ## About The Project
 
-Pseudo-Nym is a small but powerful alias manager for Unix-based operating systems built in Rust. It was created to simplify and streamline your shell experience by providing a quick and easy way to create, manage, and document your shell aliases. Nym allows the user to create an alias and its description with one command, toggle it on and off, list all aliases, and more.
+Pseudo-Nym is a small but powerful alias manager for Unix-based operating systems built in Rust. It was created to simplify and streamline your shell experience by providing a quick and easy way to create, manage, and document your shell aliases and scripts. Nym allows the user to create aliases and scripts with descriptions all in one command, toggle them on and off, list them, and more.
 
 _Currently Nym has only been tested on **zsh** and **bash** shell environments._
 
@@ -63,7 +63,7 @@ To build and install nym follow these simple steps.
 
 - [Rust](https://www.rust-lang.org/tools/install) and Cargo
 
-  ```sh
+  ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   ```
 
@@ -86,84 +86,50 @@ To build and install nym follow these simple steps.
 
 1. Clone the repo
 
-   ```sh
+   ```bash
    git clone https://github.com/WillHord/nym.git
    cd nym
    ```
 
 2. Build nym and move binary to bin
 
-   ```sh
+   ```bash
    cargo build --release
    sudo install target/release/nym /usr/local/bin
    ```
 
 3. Run install command with shell profile
 
-   ```sh
+   ```bash
    nym install <path_to_shell_profile>
    ```
 
 <!-- USAGE EXAMPLES -->
 
-## Usage
+## Basic Usage
 
-- Add an alias
+```bash
+nym <command> <args>
 
-  ```sh
-  nym add <alias> <description>
-  # Eample
-  nym add example="echo 'testing'" "This is an example alias"
-  ```
+# Add alias
+nym add alias example="echo 'testing'" "This is an example alias description"
 
-- Toggle alias
+# Add script
+nym add script example.py
 
-  ```sh
-  nym toggle <alias_name>
-  # Eample
-  nym toggle example
-  ```
+# Toggle alias/script
+nym toggle example
 
-- Rename alias
+# Remove alias/script
+nym rm example
 
-  ```sh
-  nym rename <old_alias_name> <new_alias_name>
-  # Eample
-  nym rename example example2
-  ```
+# Rename alias/script
+nym rename example example2
 
-- Remove alias
-
-  ```sh
-  nym rm <alias_name>
-  # Eample
-  nym rm example
-  ```
-
-- View alias description
-
-  ```sh
-  nym man <alias_name>
-  # Eample
-  nym man example
-  ```
-
-- List all aliases
-
-  ```sh
-  nym list <optional flags>
-  # Eamples
-  nym list
-  nym list --disabled
-  ```
-
-- Sync aliases
-
-  ```sh
-  # The Sync command finds discrepancies between the alias file and the json config file and updates accordingly
-  nym sync
-  ```
-
+# List aliases and scripts
+nym list
+nym ls
+```
 <!-- ROADMAP -->
 
 ## Roadmap
@@ -172,10 +138,11 @@ To build and install nym follow these simple steps.
 - [x] Rename command for aliases
 - [x] Manage Scripts as well as Aliases
 - [x] Aliases groups (enable sorting aliases and toggling in groups)
-- [ ] Allow aliases to be executed in a specific order (allows for aliases based on aliases)
+- [ ] Allow aliases to be read in a specific order (allows for aliases based on other aliases)
 - [ ] Better installation (brew, cargo, etc.)
 - [ ] Test on other shell environments (other than bash, and zsh)
 - [ ] Download aliases from web (github repos)
+- [ ] Export aliases to a file
 
 See the [open issues](https://github.com/WillHord/nym/issues) for a full list of proposed features and known issues.
 
