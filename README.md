@@ -169,5 +169,5 @@ Distributed under the GNU GPL v3 License. See [LICENSE](https://github.com/WillH
 
 [issues-shield]: https://img.shields.io/github/issues/WillHord/nym.svg?style=for-the-badge
 [issues-url]: https://github.com/WillHord/nym/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/main/LICENSE
+[license-shield]: https://img.shields.io/github/license/WillHord/nym.svg?style=for-the-badge
+[license-url]: https://github.com/WillHord/nym/blob/main/LICENSE
