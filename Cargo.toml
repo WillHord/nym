@@ -1,6 +1,6 @@
 [package]
 name = "nym"
-version = "0.1.1"
+version = "0.1.4"
 authors = ["Will Hord<will@willhord.dev>"]
 categories = ["command-line-utilities"]
 keywords = ["cli", "shell", "tool", "utility"]
@@ -22,3 +22,17 @@ serde = { version = "1.0.203", features = ["derive"] }
 inquire = { version = "0.7.5", features = ["date"] }
 serde_json = "1.0.117"
 strsim = "0.11.1"
+regex = "1.10.5"
+fancy-regex = "0.13.0"
+rusqlite = { version = "0.31.0", features = ["bundled"] }
+indexmap = "2.3.0"
+crossterm = "0.28.1"
+fuzzy-matcher = "0.3.7"
+
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

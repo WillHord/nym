@@ -1,18 +1,29 @@
-use crate::file_management::json::{fuzzy_get_alias, get_aliases_from_file};
-
+use crate::{
+    error,
+    file_management::database::{aliases::get_all_aliases, setupdb},
+    warning,
+};
 use console::style;
 
-pub fn list_aliases(file: &str, disabled: bool) {
-    let aliases = get_aliases_from_file(file);
-    if aliases.aliases.is_empty() {
-        println!(
-            "{}: {}",
-            style("Warning").yellow().bold(),
-            style("No aliases found")
-        );
+use super::fuzzy_get_alias;
+
+pub fn list_aliases(db_file: &str, disabled: bool) {
+    let conn = match setupdb(db_file) {
+        Ok(conn) => conn,
+        Err(_) => {
+            error!("issue connecting to database");
+            return;
+        }
+    };
+
+    let aliases = get_all_aliases(&conn);
+
+    if aliases.is_empty() {
+        warning!("No aliases found");
         return;
     }
-    for alias in aliases.aliases {
+
+    for alias in aliases {
         if alias.enabled && !disabled {
             println!(
                 "✅ {}-> {}",
@@ -29,21 +40,20 @@ pub fn list_aliases(file: &str, disabled: bool) {
     }
 }
 
-pub fn alias_manual(json_file: &str, name: &str) {
+pub fn alias_manual(db_file: &str, name: &str) {
     // Print manual for alias
     // Fuzzy get alias, if name not same lsit similar aliases
     // If no similar aliases, print error
 
-    let alias = fuzzy_get_alias(name, json_file);
+    let alias = fuzzy_get_alias(name, db_file);
     match alias {
         Some(alias) => {
             if alias.name != name {
-                println!(
-                    "{}: Alias {} not found showing {}",
-                    style("Warning").yellow().bold(),
+                warning!(format!(
+                    "Alias {} not found showing {}",
                     style(name).bold(),
                     style(alias.name.clone()).bold()
-                );
+                ));
             }
             println!(
                 "{}: {}",
@@ -52,11 +62,7 @@ pub fn alias_manual(json_file: &str, name: &str) {
             );
         }
         None => {
-            eprintln!(
-                "{}: Alias {} not found",
-                style("Error").red().bold(),
-                style(name).bold()
-            );
+            error!(format!("Alias {} not found", style(name).bold()));
         }
     }
 }
