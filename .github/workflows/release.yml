@@ -2,10 +2,10 @@ name: Build and Release
 
 on:
   push:
-    branch:
+    branches:
       - test-gh-action
-    tags:
-      - "v*"
+    # tags:
+    #   - "v*"
 
 jobs:
   build:
