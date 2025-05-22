@@ -85,6 +85,7 @@ jobs:
       - name: Display downloaded files
         run: ls -R artifacts
 
+      # TODO: add auto generated release messages
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
