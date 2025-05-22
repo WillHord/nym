@@ -101,7 +101,9 @@ mod tests {
         assert!(script.is_err());
 
         // Clean up
+        if std::fs::exists(script_path).unwrap() {
+            std::fs::remove_file(script_path).expect("Error cleaning up test files");
+        }
         std::fs::remove_dir_all(test_dir).expect("Error cleaning up test files");
-        std::fs::remove_file(script_path).expect("Error cleaning up test files");
     }
 }
