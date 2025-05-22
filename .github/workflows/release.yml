@@ -2,11 +2,11 @@ name: Build and Release
 
 on:
   push:
-    # branches:
-    #   - test-gh-action
     tags:
       - "v*"
-  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -16,19 +16,26 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
+            archive_name: x86_64-linux-musl
+            archive_format: tar.gz
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
+            archive_name: x86_64-linux-gnu
           # - target: aarch64-unknown-linux-gnu
           #   os: ubuntu-latest
           - target: x86_64-apple-darwin
             os: macos-latest
+            archive_name: x86_64-apple-darwin
           - target: aarch64-apple-darwin
             os: macos-latest
+            archive_name: aarch64-apple-darwin
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
+      - name: Install Rust Toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           profile: minimal
@@ -40,13 +47,50 @@ jobs:
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: sudo apt-get update && sudo apt-get install -y musl-tools
 
-      - uses: actions-rs/cargo@v1
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release --target ${{ matrix.target }}
 
-      - name: Upload Artifact
+      - name: Package binary
+        shell: bash 
+        run: |
+          cd target/${{ matrix.target }}/release
+          ARCHIVE_FILE=""
+          if [ "${{ matrix.archive_format }}" == "zip" ]; then
+            zip nym-${{ matrix.target }}.zip nym.exe
+            ARCHIVE_FILE="nym-${{ matrix.target }}.zip"
+          else
+            tar -czf nym-${{ matrix.target }}.tar.gz nym
+            ARCHIVE_FILE="nym-${{ matrix.target }}.tar.gz"
+          fi
+          echo "ASSET_PATH=$PWD/$ARCHIVE_FILE" >> "$GITHUB_ENV"
+
+      - name: Upload Artifact for Release (for later use by release job)
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/
+          path: ${{ env.ASSET_PATH }}
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display downloaded files
+        run: ls -R artifacts
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
